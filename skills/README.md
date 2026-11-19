@@ -10,6 +10,8 @@ The Claude skills SHOTOKAN reviews run on. A skill is a folder with a `SKILL.md`
 | [replay-review-prediction](replay-review-prediction/SKILL.md) | Predict each set before reviewing it, then grade the prediction. |
 | [sf6-drive-efficiency](sf6-drive-efficiency/SKILL.md) | Value of Drive and super spending on offense and defense. |
 | [sf6-coach-doctaafrikan](sf6-coach-doctaafrikan/SKILL.md) | Notes from two coaching sessions with DoctaAfrikan (E.X. Dojo): categorizing opponents, Venn-diagram answers, default offense that gathers info, Cammy as a "scam artist", structured training. Shared with permission. |
+| [sf6-footsies-handbook-maj](sf6-footsies-handbook-maj/SKILL.md) | Maj's *Street Fighter Footsies Handbook* (sonichurricane.com): Elements 1-35, Rules 1-5, the projectile and avoiding-footsies supplements and the epilogue, paraphrased with SF6 translations. A lens the review loads. |
+| [sf6-fgc-glossary](sf6-fgc-glossary/SKILL.md) | FGC and Street Fighter vocabulary from Infil's *Fighting Game Glossary* (glossary.infil.net), paraphrased and grouped, so reviews use terms consistently. |
 
 ## Personalize them
 Every copy here, and in `skills/local/`, has the author's details replaced with placeholders. Fill them in with your own before installing:
@@ -42,7 +44,7 @@ mkdir -p skills-personal && cp -r skills/. skills-personal/ && find skills-perso
 `skills-personal/` is gitignored, so your details stay out of the repo.
 
 ## Coaching lenses (`skills/local/`, not in the repo)
-The review method also loads coaching "lens" skills: paraphrased summaries of E.X. Dojo seminars, Maj's Street Fighter Footsies Handbook and Infil's Fighting Game Glossary. They stay out of the public repo for now (`skills/local/` is in `.gitignore`). The list of what each one covers is in `SKILLS.md` (also local only).
+The review method also loads coaching "lens" skills: paraphrased summaries of E.X. Dojo seminars. They stay out of the public repo for now (`skills/local/` is in `.gitignore`). The list of what each one covers is in `SKILLS.md` (also local only).
 
 If you have them, put each in `skills/local/<name>/SKILL.md`. Without them the core skills still run; findings just won't be tagged with those lenses.
 
