@@ -12,6 +12,8 @@ The Claude skills SHOTOKAN reviews run on. A skill is a folder with a `SKILL.md`
 | [sf6-coach-doctaafrikan](sf6-coach-doctaafrikan/SKILL.md) | Notes from two coaching sessions with DoctaAfrikan (E.X. Dojo): categorizing opponents, Venn-diagram answers, default offense that gathers info, Cammy as a "scam artist", structured training. Shared with permission. |
 | [sf6-footsies-handbook-maj](sf6-footsies-handbook-maj/SKILL.md) | Maj's *Street Fighter Footsies Handbook* (sonichurricane.com): Elements 1-35, Rules 1-5, the projectile and avoiding-footsies supplements and the epilogue, paraphrased with SF6 translations. A lens the review loads. |
 | [sf6-fgc-glossary](sf6-fgc-glossary/SKILL.md) | FGC and Street Fighter vocabulary from Infil's *Fighting Game Glossary* (glossary.infil.net), paraphrased and grouped, so reviews use terms consistently. |
+| [sf6-coach-juzzy-tips](sf6-coach-juzzy-tips/SKILL.md) | Lessons from Juzzy's *Juzz the Tip* videos (YouTube @juzz87): neutral skips before footsies, pressing with intention, meter and cash-outs, plus frames, overextending, autopilot, the don't-whiff drill. Shared with permission. |
+| [sf6-coach-juzzy-sessions](sf6-coach-juzzy-sessions/SKILL.md) | Recurring themes from Juzzy's *Sit Down and Shut Up* coaching sessions and set reviews: play grounded, don't give up space, corner control, shimmy punishes and interactions to kill, block more, Drive discipline. Shared with permission. |
 
 ## Personalize them
 Every copy here, and in `skills/local/`, has the author's details replaced with placeholders. Fill them in with your own before installing:
