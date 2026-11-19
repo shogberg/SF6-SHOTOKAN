@@ -1,0 +1,22 @@
+# Secrets
+.env
+*.env
+!.env.example
+
+# Personal data: never commit
+*.db
+*.db-journal
+beh_cache.json
+replays/
+history/
+*.mp4
+*.mkv
+# capture files are large and contain match data
+captures/
+review/
+batch_record.log
+
+# Python
+__pycache__/
+*.pyc
+.venv/

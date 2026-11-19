@@ -225,3 +225,21 @@ How to read a profile:
 
 ### Player comparison over time
 When a player has history in the database, the dashboard compares this set with their history per game: throws, damage dealt and taken, supers, pressing after blocking, burnouts and so on. This flags whether a performance was typical or an outlier (for example, a different setting or the opponent forcing a change).
+
+---
+
+## Repository layout
+
+| Path | What it is |
+|---|---|
+| `tools/analyze_capture.py` | Turns REFramework capture files into review datasets (hits, events, parries, resources, timings). |
+| `tools/sf6db.py`, `rank.py`, `spectra.py`, `behavior.py`, `beh_cache.py` | The history database (SQLite) and the player spectra and behaviour stats. |
+| `tools/wip_from_db.py`, `overview_from_db.py`, `profiles_from_db.py`, `sf6db_export.py`, `ranked_build.py` | Build dashboard datasets, overviews and player profiles from the database. |
+| `tools/standalone.py`, `standalone_head.html`, `standalone_shim.js`, `summary_md.py`, `check_page.py` | Offline HTML copies of dashboards, summaries and page checks. |
+| `tools/drive_contact.py`, `drive_measure.py` | Drive gauge measurement helpers. |
+| `tools/base_damage.json`, `tools/enums.json` | Base damage per move and the game enums the analyzer reads. |
+| `batch/` | `batch_record.py` drives OBS to record replays by ID (see `batch/README.md`). |
+
+The in-game scripts (`capture_replay.lua`, `export_moves.lua`, `batch_replays.lua`) live in the separate REFramework mods repo.
+
+Not in this repo, on purpose: the history database, capture files, replays and videos, and the review dashboards. They hold match data about real players. Some scripts still have the author's local paths (`D:\SF6-Claude-Coaching`, working folders) as defaults; change them for your setup.

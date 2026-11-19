@@ -1,0 +1,6 @@
+# Analysis and database tools use the Python standard library only.
+# Batch recording (batch/batch_record.py):
+obsws-python
+python-dotenv
+# Optional: page checks (tools/check_page.py)
+playwright
