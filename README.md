@@ -240,6 +240,6 @@ When a player has history in the database, the dashboard compares this set with 
 | `tools/base_damage.json`, `tools/enums.json` | Base damage per move and the game enums the analyzer reads. |
 | `batch/` | `batch_record.py` drives OBS to record replays by ID (see `batch/README.md`). |
 
-The in-game scripts (`capture_replay.lua`, `export_moves.lua`, `batch_replays.lua`) live in the separate REFramework mods repo.
+The in-game scripts (`capture_replay.lua`, `export_moves.lua`, `batch_replays.lua`) live in the separate REFramework mods repo, [SF6-SHOTOKAN-mods](https://github.com/shogberg/SF6-SHOTOKAN-mods). That repo also ships move names for the full roster in `data/sf6_moves/`; point the analyzer at them with `SF6_MOVES=<path to data/sf6_moves>` so hits and habits use move names instead of action IDs.
 
 Not in this repo, on purpose: the history database, capture files, replays and videos, and the review dashboards. They hold match data about real players. Some scripts still have the author's local paths (`D:\SF6-Claude-Coaching`, working folders) as defaults; change them for your setup.
