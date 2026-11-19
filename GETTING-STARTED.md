@@ -59,13 +59,39 @@ Open a new chat. If you're in the desktop app, give Claude access to your coachi
 Things that help Claude get it right:
 - **Which games make up a set**, and the format (FT2 = first to 2 games, FT3 = first to 3).
 - **Which player is you.** For local matches with no CFN names, give each player a name and character.
-- **The review level you want:**
-  - **Quick**: the numbers only, fast;
-  - **Full**: adds the story of the set, habits, gameplans, fixes and a training routine;
-  - **Tournament**: adds a decision-by-decision audit from both sides.
+- **The review level you want:** Quick, Full or Tournament (see "Choosing a review level" below). If you don't say, Claude asks or picks Full.
 - Ask for a **prediction** first if you want to test how well Claude reads the matchup before it looks at the games.
 
 A review takes a while: Claude reads every frame, runs the analysis, and builds the dashboard. You can leave the chat open and come back.
+
+### Choosing a review level
+The three levels use the same game data. They differ in how much Claude writes and checks by hand.
+
+| | **Quick** | **Full** | **Tournament** |
+|---|---|---|---|
+| **In one line** | The numbers, computed straight from the capture | Quick + a coach's written review | Full + a match-by-match audit from both players' sides |
+| **Damage breakdown, hit kinds, counter hits, anti-airs, burnouts, punishes** | ✓ | ✓ | ✓ |
+| **Drive and super spending, Drive economy, every hit** | ✓ | ✓ | ✓ |
+| **Player reads** (archetype and the eight spectra) | Computed from the data | Computed, then checked; Claude can overrule a score and says why | Same as Full, for both players in depth |
+| **Habits** | Auto-detected from the stats (top damage starters, burnouts, what you press after blocking) | Written up, with when they happened and a fix for each | Same as Full |
+| **Story of the set** (what worked, what cost games, what changed game to game) | – | ✓ | ✓ |
+| **Gameplans** (each player's plan and how they adjusted) | – | ✓ | ✓ |
+| **Fixes with drills, training routine** | – | ✓ | ✓, plus a longer training plan |
+| **Findings by coaching skill** (E.X. Dojo, Maj, etc.) | – | ✓ | ✓ |
+| **Key moments checked on video** | – | Some | Every key exchange |
+| **Decision audit** ("could you have guessed better?" at each big guess) | – | – | ✓ |
+| **Both players' perspectives** (a review written for your opponent too) | – | – | ✓ |
+| **Between-games advice and rematch prep** | – | – | ✓ |
+| **Time** | Fastest | Longer | Longest |
+
+**Which to pick:**
+- **Quick:** a batch of ranked sets, or when you just want the numbers. Quick reviews still feed your history, so patterns across many sets show up in your player profile.
+- **Full:** a set you want to learn from: a loss you don't understand, a new matchup, a rival.
+- **Tournament:** an important set (a tournament, a long FT3/FT5 against one player), or when you want to coach both sides. It works best with video of every game.
+
+A **prediction** can go with any level: ask "predict it first" and Claude writes its call before looking at the games, then grades itself in the review.
+
+You can start small and go deeper later: "do a Full review of set 3" turns an existing Quick review into a Full one.
 
 ## 6. What you get back
 - **A dashboard** (an interactive page in the chat):
