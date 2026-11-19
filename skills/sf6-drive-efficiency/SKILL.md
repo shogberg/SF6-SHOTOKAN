@@ -5,7 +5,7 @@ description: "Model the value of SF6 Drive and super spending in replay reviews:
 
 # SF6 Drive efficiency
 
-Use this in every replay review (sf6-replay-analysis loads it) and whenever Sean asks whether a Drive or super spend was worth it. The question is always: **what did the spend buy, compared with the best route that didn't spend?** And on defense: **what did the choice cost in Drive, compared with blocking?**
+Use this in every replay review (sf6-replay-analysis loads it) and whenever {{PLAYER_NAME}} asks whether a Drive or super spend was worth it. The question is always: **what did the spend buy, compared with the best route that didn't spend?** And on defense: **what did the choice cost in Drive, compared with blocking?**
 
 Drive moves in both directions all the time, not only when a player spends it:
 - **Hitting gives Drive back**: the attacker gains Drive when an attack connects, on hit **and on block**.
@@ -15,7 +15,7 @@ Drive moves in both directions all the time, not only when a player spends it:
 So a player's Drive economy = what they spend + what they lose (blocking, punish counters, Drive Impact) - what they gain (hitting, blocks, parries, regen). Burnout usually comes from the losses as much as from the spending.
 
 ## 1. Gauge facts (measured, not remembered)
-Measured from Sean's REFramework captures (Nov 2026 patch). Re-measure after a patch with `tools\drive_measure.py "replays\*.json"` (Drive changes by state) and `tools\drive_contact.py "replays\*.json"` (gains and losses on contact by move type), and cross-check the SuperCombo `Street_Fighter_6/Gauges` page. Drive gauge max 60,000 = 6 bars; super max 30,000 = 3 bars.
+Measured from {{PLAYER_NAME}}'s REFramework captures (Nov 2026 patch). Re-measure after a patch with `tools\drive_measure.py "replays\*.json"` (Drive changes by state) and `tools\drive_contact.py "replays\*.json"` (gains and losses on contact by move type), and cross-check the SuperCombo `Street_Fighter_6/Gauges` page. Drive gauge max 60,000 = 6 bars; super max 30,000 = 3 bars.
 
 | Item | Measured |
 |---|---|
@@ -37,7 +37,7 @@ Drive lost while blocking or getting hit is **not** spending (the resource log e
 
 ## 2. What a bar is worth
 There's no fixed exchange rate; value a resource by what else it could have bought and what losing it risks.
-- **Damage equivalent:** for each character, the median extra damage a bar bought in Sean's history (route comparison in section 3, from the database). Use that as the base value of 1 Drive bar and 1 super bar, per character. With fewer than ~5 comparable routes, say the value is uncalibrated rather than inventing one.
+- **Damage equivalent:** for each character, the median extra damage a bar bought in {{PLAYER_NAME}}'s history (route comparison in section 3, from the database). Use that as the base value of 1 Drive bar and 1 super bar, per character. With fewer than ~5 comparable routes, say the value is uncalibrated rather than inventing one.
 - **Scarcity:** the bars that take a player below 2 are worth more, because they sit next to burnout (no Drive Rush, no parry, no Drive Reversal, chip damage, a blocked Drive Impact can stun in the corner). Flag every spend that left the spender at 2 bars or fewer, and every burnout, with what drained them (spending vs blocking vs getting punish-countered).
 - **Lethal:** a spend that kills or wins the round is worth it (chess, sf6-replay-analysis 5b). A spend that adds damage to an opponent who dies anyway is waste.
 - **Opportunity:** super bars kept for a Level 3 / CA threat or a reversal have value unspent; note when a spend gave up a later kill threat.
@@ -80,14 +80,14 @@ At each defensive spend (wake-up reversal, Drive Reversal, Drive Parry, OD rever
 Verdict per spend: better than blocking, about even, or worse, with the numbers. Defensive calls are usually poker (sf6-replay-analysis 5b): judge them against the attacker's shown frequencies, not the single outcome.
 
 ## 5. Oki thresholds (to be added)
-Sean plans to add **knockdown-advantage thresholds** that say which okizeme options a given plus frame allows (e.g. meaty a 5f button, safe jump, strike/throw without a dash, dash-up meaty, needs Drive Rush), per character. When the table exists, turn each `kd_adv` into named oki options and include them in the offense gain. Until then, report `kd_adv` and the recovery type, and describe the oki in words.
+{{PLAYER_NAME}} plans to add **knockdown-advantage thresholds** that say which okizeme options a given plus frame allows (e.g. meaty a 5f button, safe jump, strike/throw without a dash, dash-up meaty, needs Drive Rush), per character. When the table exists, turn each `kd_adv` into named oki options and include them in the offense gain. Until then, report `kd_adv` and the recovery type, and describe the oki in words.
 
 ## 6. Where the numbers are
 - **Per combo** (hits rows / `hits` table): `drive_spent`, `super_spent`, `drive_gained`, `drive_damage`, `knockdown`, `kd_adv`, `corner_dist`, `victim_drive_after`.
 - **Per player per round** (`resources.json` / `resources` table): Drive spent by category (Drive Rush, Drive Parry, Drive Impact, Drive Reversal, OD specials, other), super bars spent with each super (as `L<level> <move>[ extended] (<bars> bars[, +<n> Drive]) @<timer>`: the level is the bars its first drain used, and later drains while the player never left the super animation, unless a fresh super start, are added to it), burnouts, gauges left at round end, plus `gain_hit`, `gain_block` (Drive gained by hitting), `parry_regain`, `loss_block` (Drive lost blocking), `loss_hit` (lost getting hit), `loss_hit_drive_impact`, `loss_hit_punish_counter`.
 - **Per parry** (`parries.json` / `parries` table): as in section 4.
 - report.md has `resources`, `contact`, `Drive efficiency` and `Drive Parries` sections.
-- On the dashboards: separate Drive and super spending charts (super by level), the Drive economy section (Out vs In, Drive Parry summary, combos that spent resources), and a Drive economy trend on the Overview. Knockdown advantage is recorded but left off the dashboards until Sean adds his oki thresholds.
+- On the dashboards: separate Drive and super spending charts (super by level), the Drive economy section (Out vs In, Drive Parry summary, combos that spent resources), and a Drive economy trend on the Overview. Knockdown advantage is recorded but left off the dashboards until {{PLAYER_NAME}} adds his oki thresholds.
 
 ## 7. Reporting
 - In the Resources part of the report, add **Drive efficiency** for each player: the Drive economy per round (spent, lost blocking, lost to punish counters / Drive Impact, gained from hits, blocks and parries), damage bought per net Drive bar and per super bar, the 2-3 best and worst spends (round + timer, route used vs free route, gain, verdict), parry net Drive and times thrown out of parry, and what drained them before each burnout.

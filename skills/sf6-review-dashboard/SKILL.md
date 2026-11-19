@@ -5,7 +5,7 @@ description: "Format for SF6 replay-review dashboards (like \"splash-test\" and 
 
 # SF6 review dashboard format
 
-Use this when an SF6 replay review (sf6-replay-analysis) is put into a dashboard. Keep this layout unless Sean asks for changes. If he edits a dashboard's formatting by hand, offer to update this skill from his version.
+Use this when an SF6 replay review (sf6-replay-analysis) is put into a dashboard. Keep this layout unless {{PLAYER_NAME}} asks for changes. If he edits a dashboard's formatting by hand, offer to update this skill from his version.
 
 ## 1. Terms (use these everywhere: page text, dataset names, summaries)
 - **Round**: one life bar. A **game** is one replay (one replay ID), made of 2 or 3 rounds.
@@ -14,7 +14,7 @@ Use this when an SF6 replay review (sf6-replay-analysis) is put into a dashboard
   - **FT3** (first to 3), also called **BO5**.
   - **FT5** (first to 5), also called **BO9**. This one is rarer.
 - **Grouping games into sets:**
-  - Use the sets Sean specifies.
+  - Use the sets {{PLAYER_NAME}} specifies.
   - If he submits games together and both players are the same in all of them, assume they form a set.
   - If the grouping is unclear, ask before building. Examples: more games than one set's format allows, or a score that doesn't fit the format.
   - A dashboard can hold several sets. Group everything by set, then by game. The page shows one set at a time, chosen with the "Show set" picker (section 5).
@@ -24,14 +24,14 @@ Use this when an SF6 replay review (sf6-replay-analysis) is put into a dashboard
   - **Set score**: games won within a set ("3-2", P1 first).
 
 ## 2. Artifact and data
-- Make the dashboard from the **Data** artifact type (list_types → create_from_type), titled as Sean names it (e.g. the folder name). One dashboard per review.
+- Make the dashboard from the **Data** artifact type (list_types → create_from_type), titled as {{PLAYER_NAME}} names it (e.g. the folder name). One dashboard per review.
 - All data is in **attached JSON files** (upload_asset), declared as `datasets/<id>` with:
   - `source: {kind:"file", url, name, format:"json"}`
   - `fixed: true`
   - `updated: {at, by:"Claude"}`
   - When a file changes, re-upload it, then `update` the dataset's `source.url` and `updated`.
 - Refer to players by their in-game names.
-  - P1 is the player in focus: Sean, or whoever Sean asks to review. P2 is the opponent.
+  - P1 is the player in focus: {{PLAYER_NAME}}, or whoever {{PLAYER_NAME}} asks to review. P2 is the opponent.
   - Column names use lower-case player prefixes (`<p1>_…`, `<p2>_…`).
 - Every dataset row has a unique id column, which the page uses as `data-row-key` (`archetypes` rows use `arch_id`).
 - Every row in every dataset has `set_id` (archetypes, habits, punish, findings, fixes and training too), so the page can show one set at a time. When adding a set to an existing dashboard, keep the old rows and append the new set's rows with new ids.
@@ -106,7 +106,7 @@ Give every hit P1 takes one `lens` group. The groups come from the Stagger Press
 3. **KPI tiles** (`.st-tiles`), each showing "P1 / P2" in that order: Burnouts · Anti-airs · Counter hits · Punish counters · Perfect parries.
 4. **Hits landed by kind**: legend plus a grouped bar chart of `kind_counts`.
 4b. **Drive and super spending**: a note that Drive and super are separate gauges, then two full-width cards (one above the other, not side by side, so the lines under the bars fit). Drive card: label (bars; a full gauge is 6; chip and Drive lost to hits aren't spending), a five-colour legend (Drive Rush `#2f9e6b`, Drive Parry `#2f6fd6`, Drive Impact `#d9622b`, Drive Reversal `#8e5bd6`, OD specials `#c9a227`) and one stacked bar per player from `res_totals` with "X Drive bars, N burnouts over R rounds". Super card: label (bars; a full gauge is 3; an extended super counts at its own level), legend (Level 1 `#2f6fd6`, Level 2 `#c9a227`, Level 3 / Critical Art `#d6336c`) and one stacked bar per player from `sup_totals` with "N supers (a Level 1, b Level 2, c Level 3 / CA; e extended), X bars; Y bars left unspent at round ends". Both use `ST.stackBars`. Under it a closed `<details>` "Spending by round" with the `resources` table (game, round, player, each category, totals, supers used, burnouts, Drive / super left).
-4c. **Drive economy**: a note on what Out and In mean (passive regen not shown), then a card with the legend (Spent `#2f9e6b`, Lost blocking `#d9622b`, Lost getting hit `#d6336c`, Gained landing hits `#2f6fd6`, Gained on block `#8e5bd6`, Gained from parries `#c9a227`) and, per player, an Out bar and an In bar on the same scale with totals, plus a line "Lost X to punish counters and Y to Drive Impact hits; N burnouts over R rounds" (`econ`). Then `h3` **Drive Parry** with the `parry_sum` table and a closed `<details>` "Every parry" (`parries` table); and a closed `<details>` "Combos that spent Drive or super, and what they bought" (hits with `drive_spent` or `super_spent` > 0: game, round, @, attacker, starter, damage, Drive spent, super spent, Drive back, their Drive lost, knockdown, to corner). Knockdown advantage (`kd_adv`) stays off the page until Sean adds his oki thresholds.
+4c. **Drive economy**: a note on what Out and In mean (passive regen not shown), then a card with the legend (Spent `#2f9e6b`, Lost blocking `#d9622b`, Lost getting hit `#d6336c`, Gained landing hits `#2f6fd6`, Gained on block `#8e5bd6`, Gained from parries `#c9a227`) and, per player, an Out bar and an In bar on the same scale with totals, plus a line "Lost X to punish counters and Y to Drive Impact hits; N burnouts over R rounds" (`econ`). Then `h3` **Drive Parry** with the `parry_sum` table and a closed `<details>` "Every parry" (`parries` table); and a closed `<details>` "Combos that spent Drive or super, and what they bought" (hits with `drive_spent` or `super_spent` > 0: game, round, @, attacker, starter, damage, Drive spent, super spent, Drive back, their Drive lost, knockdown, to corner). Knockdown advantage (`kd_adv`) stays off the page until {{PLAYER_NAME}} adds his oki thresholds.
    On the **Overview** tab, before "What to work on next": **Drive economy over time**, a note naming the unit (set by set, or game by game with fewer than 3 sets), a line chart of P1's spent / lost blocking / lost getting hit / gained per round (`ov_econ`, colours as in 4c, gained `#2f6fd6`), and a closed `<details>` table with both players' columns. Add its draws to `ST.OVDRAW`.
 5. **Player reads**: one card per player with Archetype (lean, confidence), then the eight spectra (`ST.spectra`: axis name, left label, five dots with the score filled, right label, then "label: evidence"), then How they adapted, Evidence and What it costs / how to beat it. Older rows without `spectra` fall back to Risk tolerance and Temperament.
 6. **Habits**: two columns (`.st-two`), one card per player, filled by `ST.habits`. Each item shows:
@@ -422,8 +422,8 @@ HTML hooks the page needs:
 - Tables: `t_punish`, and `t_hits` (inside the closed details, with the `#hit-filter` select).
 
 ## 10. Local copies
-Save to `D:\SF6-Claude-Coaching\<review-folder>\review\` (write via /mnt/user-data/outputs + device_commit_files):
-- `<name>.html`: a standalone page for Sean's webserver.
+Save to `{{COACHING_DIR}}\<review-folder>\review\` (write via /mnt/user-data/outputs + device_commit_files):
+- `<name>.html`: a standalone page for {{PLAYER_NAME}}'s webserver.
   - Same HTML without the meta line.
   - d3 **inlined** (not from a CDN).
   - Data embedded as `window.__DATA__`.
@@ -434,7 +434,7 @@ Save to `D:\SF6-Claude-Coaching\<review-folder>\review\` (write via /mnt/user-da
 - `data\*.json` and `data\*.csv` for every dataset.
 
 ## 11. Hand-over
-Tell Sean:
+Tell {{PLAYER_NAME}}:
 - the dashboard link;
 - the set result(s);
 - the top 3 highs and lows;
