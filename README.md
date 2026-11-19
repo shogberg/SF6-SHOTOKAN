@@ -92,51 +92,7 @@ Replay reviews for Street Fighter 6. Claude reads each game's REFramework captur
 
 ---
 
-## 2. What each skill provides
-
-Every review loads the skills below. Each one is a lens: a set of questions to ask of the replay, and the vocabulary used for findings. Findings are tagged with the skill that produced them (see "Findings by skill" on any dashboard).
-
-### Core
-| Skill | Provides |
-|---|---|
-| **sf6-replay-analysis** | The review method: reading captures and HUD, logging moments by round and timer, frame-data checks (SuperCombo), both players' habits and fixes, the "chess or poker?" rule (a stock answer gets one fix; a read gets the options and what each one beats). |
-| **sf6-review-dashboard** | Dashboard layout, dataset schemas, page code, and local and standalone copies. |
-| **replay-review-prediction** | The pre-review prediction and its grading afterwards. |
-| **sf6-drive-efficiency** | Value of Drive and super spending: resource routes vs meterless routes (damage, knockdown, position), and reversal / parry / Drive Reversal vs blocking on defense. |
-| **sf6-fgc-glossary** | Consistent FGC vocabulary (Infil's glossary). |
-
-### E.X. Dojo seminars
-| Skill | Lens |
-|---|---|
-| **footsies-101** | Red/yellow/green threat zones, interceptive timing, the footsies triangle (poke > walk-in > whiff punish > poke), small vs big steps. |
-| **spacing-traps** | Making a spacing whose response you can predict, and punishing it; learning from failed traps. |
-| **using-pokes** | What makes a good poke; using pokes to pin timing and position and to gather data. |
-| **air-footsies** / **how-to-jump** | When jumps are good (outside anti-air range, as whiff punishes, delayed or empty jumps) and how anti-airs get beaten. |
-| **dps-and-divekicks** | Dive kick height and advantage, beating dive kicks, DP range discipline. |
-| **dealing-with-drive-rush** | Drive Rush hot spots, checking with lights up close and mediums at range, parrying the fastest options. |
-| **reactions** | Anticipation over raw reaction, mental stack, reacting to Drive Impact, 2MK~Drive Rush and jumps. |
-| **jab-strings** / **stagger-pressure** | Frame traps and the four defensive timings (reversal, ~3f, ~6f safe delay, ~12f reactive); manual vs automatic staggers; checkpoints. |
-| **improving-shimmy** / **delayed-throw-offense** | Throw until they answer it; shimmy only once they've teched; in-and-out shimmy, delay jab, delayed throws. |
-| **drive-rush-blockstrings** | True vs gapped Drive Rush strings and the DP option select. |
-| **hit-confirms** | Confirm before spending Drive; err late rather than dump meter on block. |
-| **simple-gameplan** / **structuring-offense-defense** | A minimal plan per character; strike/throw and immediate/delayed structure; a primary defensive option as a message. |
-| **the-defense-equation** | Judging defensive choices by risk/reward against the "take the throw" baseline and six modifiers (HP, Drive and super for both players, screen position, characters, round/set score); "could you have guessed better?" |
-| **defense-offense-101** / **delay-option-selects** / **back-recovery** / **drive-reversal** / **drive-parry-mindgames** | Defensive tools and when each one is worth it. |
-| **holistic-lens** | Reading position, health, Drive and super together to predict what the opponent wants. |
-| **consistency** | Doing what the game wants, playing your win condition, removing volatile options. |
-| **beating-unstable-players** | Making every mistake costly, limiting interactions, safe openers. |
-| **matchups-gameplans** | Reading a character's kit to see its game plan, then adjusting per matchup. |
-| **player-archetypes** | Aggressive / Defensive / Fundamentalist / Balanced, with signs, counters and a confidence. |
-
-### Other coaches and texts
-| Skill | Lens |
-|---|---|
-| **sf6-coach-doctaafrikan** | Opponent categories (risk tolerance × temperament), the two likely follow-ups and Venn-diagram answers, "don't fight the boogeyman", default offense that gathers info, Cammy as a "scam artist". |
-| **sf6-footsies-handbook-maj** | Maj's Footsies Handbook (Elements 1-35, Rules 1-5) with SF6 translations: baiting pokes, corner footsies, baiting supers, when to jump, misdirection, committing fully. |
-
----
-
-## 3. What I look for in replays
+## 2. What I look for in replays
 
 **Every game, both players:**
 1. **Where damage came from.**
@@ -174,7 +130,7 @@ Every review loads the skills below. Each one is a lens: a set of questions to a
 
 ---
 
-## 4. What I look for in player profiles
+## 3. What I look for in player profiles
 
 ### Archetype (from E.X. Dojo)
 - **Aggressive**:
