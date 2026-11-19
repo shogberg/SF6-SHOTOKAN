@@ -47,5 +47,5 @@ The review method also loads coaching "lens" skills: paraphrased summaries of E.
 If you have them, put each in `skills/local/<name>/SKILL.md`. Without them the core skills still run; findings just won't be tagged with those lenses.
 
 ## Installing
-- **Claude.ai / desktop app:** Settings → Capabilities → Skills → upload each skill folder (zipped).
+- **Claude.ai / desktop app:** turn on **Code execution and file creation** ("Create and edit files") in **Settings → Capabilities**, then **Customize → Skills → + → + Create skill → Upload a skill**, one zip per skill folder. Step-by-step in [GETTING-STARTED.md](../GETTING-STARTED.md#3-add-the-skills-to-claude-once).
 - **Claude Code:** copy the folders into `~/.claude/skills/` (or a project's `.claude/skills/`).

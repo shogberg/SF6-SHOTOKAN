@@ -3,6 +3,8 @@
 
 > *"Look at you, mashing on wake-up. I have confirmed every frame of your hesitation, insect."*
 
+**New to Claude?** Start with [GETTING-STARTED.md](GETTING-STARTED.md): install the skills and capture scripts, record a replay, and get your first review.
+
 SHOTOKAN is the SF6 Claude Coaching replay-review system. The name is a nod to SHODAN from System Shock.
 
 Replay reviews for Street Fighter 6. Claude reads each game's REFramework capture (exact frame-by-frame game data), checks key moments against the video, and builds a dashboard showing what happened, why, and what to train next. Everything lives in `D:\SF6-Claude-Coaching`.
