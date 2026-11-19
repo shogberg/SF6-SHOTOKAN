@@ -35,7 +35,7 @@ Get-ChildItem skills -Recurse -Filter SKILL.md | ForEach-Object {
 ```
 **bash:**
 ```bash
-rsync -a skills/ skills-personal/ && find skills-personal -name SKILL.md -exec sed -i \
+mkdir -p skills-personal && cp -r skills/. skills-personal/ && find skills-personal -name SKILL.md -exec sed -i \
   -e 's/{{PLAYER_NAME}}/Alex/g' -e 's/{{PLAYER_CFN}}/.alexfgc/g' -e 's/{{PLAYER_CFN_ID}}/1234567890/g' \
   -e 's#{{COACHING_DIR}}#D:\\SF6-Claude-Coaching#g' -e 's#{{VIDEOS_DIR}}#C:\\Users\\alex\\Videos#g' {} +
 ```
