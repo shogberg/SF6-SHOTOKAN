@@ -23,3 +23,6 @@ __pycache__/
 
 # Local notes
 SKILLS.md
+
+# Coaching-lens skills: kept local for now (see skills/README.md)
+skills/local/
