@@ -273,7 +273,9 @@ def build_set(sid, order, key, D):
     def arche(p):
         ab, wk = T[p]['after block'], T[p]['wake-up']
         rate = (ab['press'] + wk['press']) / max(1, ab['n'] + wk['n'])
-        agg = rate > 0.35 or dr[p] >= 8 or jumps[p] >= 12 or len(burn[p]) >= 2
+        # raw Drive Rush counts half: a cheap, generally safe way to start pressure (1 bar, a hit if checked)
+        drw = 0.5 * drk[p]['raw drive rush'] + drk[p]['pressure drive rush cancel']
+        agg = rate > 0.35 or drw >= 8 or jumps[p] >= 12 or len(burn[p]) >= 2
         dfn = rate < 0.15 and dr[p] <= 3 and jumps[p] <= 4
         a = 'Aggressive' if agg and not dfn else 'Defensive' if dfn else 'Balanced'
         lean = []
@@ -321,6 +323,13 @@ def build_set(sid, order, key, D):
     if len(aa[opp]) > len(aa[ME]) + 1:
         H(player=ME, kind='Leak', area='Anti-air', habit=f'Anti-airs {len(aa[ME])} vs {len(aa[opp])}', seen=ats(aa[opp], 6), times=len(aa[opp]),
           fix=f"You jumped forward {jumps[ME]} times" + (f" and dive kicked about {dives} times" if DIVE_KICK.get(fchar) else '') + f"; they anti-aired {len(aa[opp])}.", origin='Game data (anti-air)', confidence='High')
+    # raw Drive Rush is only a leak when it keeps getting checked and the player doesn't adjust
+    drc = [h for h in theirs if str(h.get('victim_move') or '').startswith('Drive Rush')]
+    drc_games = sorted({h['game_no'] for h in drc})
+    if len(drc) >= 3 and len(drc_games) >= 2 and drc_games[-1] == max(g['game_no'] for g in games):
+        H(player=ME, kind='Leak', area='Drive', habit='Raw Drive Rush checked repeatedly, no adjustment', seen=ats(drc, 6), times=len(drc),
+          fix=f"Checked {len(drc)} times for {fmt(sum(h['damage'] for h in drc))}, still checked in the last game. Drive Rush from further out, "
+              "after a blocked button, or bait the check and punish it (Dealing with Drive Rush).", origin='Game data (hit out of Drive Rush)', confidence='Medium')
     if burn[ME]:
         H(player=ME, kind='Leak', area='Drive', habit=f'Burned out {len(burn[ME])}×', seen='; '.join(f"G{next(g['game_no'] for g in games if g['game_id'] == e['game_id'])} R{e['round']} @{e['round_timer']} ({e['note']})" for e in burn[ME]),
           times=len(burn[ME]), fix=f"{dr[ME]} raw / pressure Drive Rushes and {dp[ME]} Drive Parries in the set. Keep 2 bars when behind; Drive Rush after a hit (Holistic Lens).", origin='Game data (burnout flag)', confidence='High')

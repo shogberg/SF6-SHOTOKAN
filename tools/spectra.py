@@ -21,7 +21,8 @@ Axes
 - Variety: Scripted (1) <-> Mixed (5). Spread (normalized entropy) of their choices after blocking and on wake-up.
 - Resource use: Conservative (1) <-> Spendthrift (5). Drive bars + half a point per super bar + 1 per burnout, per round.
 - Risk tolerance: Low (1) <-> High (5). Risky options per round: wake-up reversals (special / super on
-  wake-up), Drive Impacts, Drive Reversals, raw Drive Rushes, supers and forward jumps.
+  wake-up), Drive Impacts, Drive Reversals, raw Drive Rushes (half weight: 1 bar and a clean or counter hit if
+  checked, a generally safe way to start pressure), supers and forward jumps.
 """
 import collections as C, json, re, sys
 
@@ -107,7 +108,7 @@ def raw(player, games, hits, tim, ev, use, beh=None):
     raw_dr = sum(1 for e in ev if e['player'] == player and e['type'] == 'raw drive rush')
     supers = sum(n for m, n in U.items() if m.startswith(('SA', 'Critical Art', 'CA')))
     jumps = U.get('BAS_JUMP_F_START', 0)
-    risky = 2 * wake_rev + 1.5 * U.get('Drive Impact', 0) + 1.5 * U.get('Drive Reversal', 0) + raw_dr + supers + 0.5 * jumps
+    risky = 2 * wake_rev + 1.5 * U.get('Drive Impact', 0) + 1.5 * U.get('Drive Reversal', 0) + 0.5 * raw_dr + supers + 0.5 * jumps
     risk = risky / R
     # frame-level counts (behavior.py), summed over the set's games
     if beh is None:
@@ -138,7 +139,7 @@ def raw(player, games, hits, tim, ev, use, beh=None):
                composure=(f"pressed {comp:.0%} as often after taking a 2,000+ combo or losing a round as otherwise" if comp is not None else 'not enough time after big damage or a lost round'),
                variety=(f"spread of choices after blocking and on wake-up: {var:.0%} of the maximum" if var is not None else 'too few after-block / wake-up choices'),
                resources=(f"{res:.1f} gauge bars spent per round ({b.get('drive_spent', 0) / 10000:.0f} Drive bars, {b.get('super_spent', 0) / 10000:.0f} super bars, {nburn} burnouts over {R} rounds)" if res is not None else 'no frame data'),
-               risk=f"{risk:.1f} risky options per round: {wake_rev} wake-up reversals, {U.get('Drive Impact', 0)} Drive Impacts, {U.get('Drive Reversal', 0)} Drive Reversals, {raw_dr} raw Drive Rushes, {supers} supers, {jumps} forward jumps over {R} rounds")
+               risk=f"{risk:.1f} risky options per round: {wake_rev} wake-up reversals, {U.get('Drive Impact', 0)} Drive Impacts, {U.get('Drive Reversal', 0)} Drive Reversals, {raw_dr} raw Drive Rushes (half weight), {supers} supers, {jumps} forward jumps over {R} rounds")
     return dict(temperament=temp, temperament_off=toff, elasticity=elas, risk=risk, initiative=ini, composure=comp, variety=var, resources=res), ev_
 
 
