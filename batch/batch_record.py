@@ -6,17 +6,18 @@ starts, stops it when the match ends, then moves the video and the capture json 
 replays folder as <ID>.mp4 and <ID>.json.
 
 Setup (once):
-  pip install obsws-python python-dotenv
+  py -m pip install obsws-python python-dotenv   (or pip install ...)
   OBS: Tools > WebSocket Server Settings > Enable (port 4455). Put the password in .env yourself.
   Copy batch_replays.lua next to capture_replay.lua in reframework/autorun.
   Copy .env.example to .env (next to this script) and fill it in.
 
 Usage:
-  python batch_record.py A7LWJNR6U PCJFRDBW3 TUE445BB9
-  python batch_record.py --file ids.txt          (one ID per line, # comments allowed)
-  python batch_record.py --probe                 (no recording: print screen changes, to calibrate)
-  python batch_record.py --no-obs ID ...         (play and capture only, no video)
-SF6 must be running, on any menu screen, with the window able to receive input.
+  py batch_record.py A7LWJNR6U PCJFRDBW3 TUE445BB9
+  py batch_record.py --file ids.txt          (one ID per line, # comments allowed)
+  py batch_record.py --probe                 (no recording: print screen changes, to calibrate)
+  py batch_record.py --no-obs ID ...         (play and capture only, no video)
+SF6 must be running on CFN > Replays > Search (Keyword Search or a search result), with the window able
+to receive input and the mouse pointer off the game window.
 """
 import argparse, json, os, shutil, sys, time
 from pathlib import Path
@@ -72,9 +73,10 @@ def wait_for(pred, timeout, what, poll=0.25):
     t0, last = time.time(), None
     while time.time() - t0 < timeout:
         s = status()
-        key = (s.get("phase"), s.get("top_flow"), s.get("note"))
+        key = (s.get("phase"), s.get("top_flow"), s.get("note"), s.get("msg"))
         if key != last:
-            log(f"  phase={s.get('phase')} screen={s.get('top_flow')} fight_st={s.get('fight_st')} note={s.get('note')}")
+            extra = f" dialog={s.get('msg')}" if s.get("msg") else ""
+            log(f"  phase={s.get('phase')} screen={s.get('top_flow')} fight_st={s.get('fight_st')} note={s.get('note')}{extra}")
             last = key
         if s.get("phase") == "error":
             raise RuntimeError(s.get("note"))
@@ -142,9 +144,10 @@ def probe():
     last = None
     while True:
         s = status()
-        key = (s.get("top_flow"), s.get("fight_st"), s.get("phase"))
+        key = (s.get("top_flow"), s.get("fight_st"), s.get("phase"), s.get("msg"))
         if key != last:
-            log(f"screen={s.get('top_flow')} fight_st={s.get('fight_st')} phase={s.get('phase')}")
+            extra = f" dialog={s.get('msg')}" if s.get("msg") else ""
+            log(f"screen={s.get('top_flow')} fight_st={s.get('fight_st')} phase={s.get('phase')}{extra}")
             last = key
         time.sleep(0.2)
 
