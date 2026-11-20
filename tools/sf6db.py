@@ -176,7 +176,7 @@ def resource_row(k, r, names):
 
 def ingest_set(con, outdir, meta):
     """meta: set_key, focus (name), played_date, ranked, review ('Full'/'Quick'), format, note, dashboard,
-    games_missing, game_times [..], focus_mr [..] (per game, optional), reads [rows], habits [rows], source (reads/habits origin),
+    games_missing, game_times [..], focus_mr [..] (per game, optional), reads [rows], habits [rows] (default: review_docs archetypes / habits), source (reads/habits origin),
     review_docs {dataset: rows} (hand-written Full-review content, kept across re-ingests), dash {"dashboard": "wip", "set_no": N} (stable Set N)."""
     L = lambda n: json.load(open(os.path.join(outdir, n + '.json')))
     hits, events, timings, games = L('hits'), L('events'), L('timings'), L('games')
@@ -260,6 +260,11 @@ def ingest_set(con, outdir, meta):
             no = d.get('set_no') or (cur.execute('SELECT COALESCE(MAX(set_no),0)+1 FROM dashboard_sets WHERE dashboard=?', (d['dashboard'],)).fetchone()[0])
             cur.execute('INSERT INTO dashboard_sets VALUES (?,?,?)', (d['dashboard'], k, no))
     src = meta.get('source')
+    # A Full review's hand-written archetypes / habits live in review_docs; use them when META has no
+    # separate reads / habits, so the reads and habits tables (and SHOTOKAN-WEB) always get them.
+    docs = meta.get('review_docs') or {}
+    if not meta.get('reads') and docs.get('archetypes'): meta['reads'] = docs['archetypes']
+    if not meta.get('habits') and docs.get('habits'): meta['habits'] = docs['habits']
     for r in meta.get('reads', []):
         if r['player'] not in names: continue
         cur.execute('INSERT OR REPLACE INTO reads VALUES (?,?,?,?,?,?,?,?,?,?,?)',
