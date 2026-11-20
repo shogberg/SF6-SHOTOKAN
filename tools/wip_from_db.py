@@ -59,23 +59,59 @@ def usage_from(rows, games):
     return out
 
 
+# Character-specific wording for the generated fixes. Moves the player actually used in the set come first;
+# these defaults fill in when the set shows none. Characters not listed get neutral wording.
+DIVE_KICK = {'Cammy': 'dive kick'}          # characters whose air special is used as a dive kick in these notes
+KIT = {
+    'Cammy': dict(aa='2MP / 5HP or Cannon Spike', wp='5MK or 2MK~Drive Rush'),
+    'Ryu': dict(aa='Shoryuken'), 'Ken': dict(aa='Shoryuken'), 'Akuma': dict(aa='Goshoryuken'), 'Luke': dict(aa='Rising Uppercut'),
+    'Terry': dict(aa='Rising Tackle'), 'Guile': dict(aa='Flash Kick'), 'Dee Jay': dict(aa='Jackknife Maximum'),
+    'Chun-Li': dict(aa='Tenshokyaku or 2HP'), 'Ed': dict(aa='Psycho Upper'), 'Mai': dict(aa='Ryuuenbu or Hissatsu Shinobibachi'),
+}
+
+
+def kit_context(fchar, mine, theirs, aa_mine):
+    """Fill the LENS_FIX templates for this player's character from what they did in the set."""
+    def pretty(m):            # raw capture ids for specials the analyzer doesn't name, e.g. ATK_SPA_236P_01_L -> 236P special (L)
+        m = str(m)
+        if m.startswith('ATK_SPA_'):
+            parts = m[8:].split('_')
+            return f"{parts[0]} special" + (f" ({parts[-1]})" if parts[-1] in ('L', 'M', 'H', 'EX', 'OD') else '')
+        return f'{m} special' if m[:3].isdigit() else m
+    top = lambda rows, k: [pretty(m) for m, _ in C.Counter(r[k] for r in rows if r.get(k)).most_common(3)]
+    # whiff punishes: ground medium / heavy normals only (no lights, jump-ins, DPs or supers)
+    ground = lambda m: len(str(m)) == 3 and str(m)[0] in '1234566789' and str(m)[1:] in ('MP', 'HP', 'MK', 'HK')
+    kd = KIT.get(fchar, {})
+    aa = top(aa_mine, 'starter')[:2]
+    wp = top([h for h in mine if h['situation'] in ('neutral', 'punish') and h['hit_kind'] != 'throw'
+              and ground(h['starter'])], 'starter')[:2]
+    unsafe = top([h for h in theirs if h['lens'] == 'Unsafe move punished' and h.get('victim_move') != 'Throw attempt'], 'victim_move')
+    dive = DIVE_KICK.get(fchar)
+    return dict(
+        aa=' or '.join(aa) + ' (your anti-airs that landed this set)' if aa else kd.get('aa', f"{fchar}'s most reliable anti-air"),
+        wp=' or '.join(wp) + ' (your best neutral starters this set)' if wp else kd.get('wp', 'your fastest long-range button'),
+        unsafe=f" ({', '.join(unsafe)})" if unsafe else '',
+        and_dives=f' and {dive}s' if dive else '', or_dive=f' or {dive}' if dive else '',
+        dive_note=f', and {dive} high enough to land plus' if dive else '', dive_skill=', DPs and Divekicks' if dive else '')
+
+
 LENS_FIX = {
     'Pressed in their pressure / on wake-up': ('Defense', 'Pressing during their pressure or on wake-up',
         'Block one beat longer after a blocked string or meaty; press only after a minus move or on a read (Stagger Pressure, Defense Equation).'),
     'Pressed at mid range': ('Neutral', 'Buttons at mid range got beaten',
-        'Stop at the edge of their poke range and let them press first; whiff-punish with 5MK or 2MK~Drive Rush (Using Pokes, Footsies 101).'),
+        'Stop at the edge of their poke range and let them press first; whiff-punish with {wp} (Using Pokes, Footsies 101).'),
     'Walked in': ('Neutral', 'Walking into their buttons or throws',
         'Walk forward in small steps and stop outside their best poke; hold a whiff punish instead of walking through it (Footsies 101).'),
-    'Jumped': ('Neutral', 'Jumps and dive kicks into anti-airs',
-        'Ask what each jump is meant to land on; dive kick only as a whiff punish, high enough to land plus (How to Jump, DPs and Divekicks).'),
+    'Jumped': ('Neutral', 'Jumps{and_dives} into anti-airs',
+        'Ask what each jump is meant to land on; jump{or_dive} only to answer a button{dive_note} (How to Jump{dive_skill}).'),
     'Unsafe move punished': ('Offense', 'Unsafe moves punished',
-        'Check the on-block advantage of what got punished (Spiral Arrow, Cannon Spike, dive kick landings) and end strings on something safe (Simple Gameplan).'),
+        'Check the on-block advantage of what got punished{unsafe} and end strings on something safe (Simple Gameplan).'),
     'Blocking, opened up': ('Defense', 'Opened up while blocking (throws, overheads, mixups)',
         'Midscreen, taking the throw is fine; in the corner back-jump or back-dash instead of teching (Defense Equation, Delay Option Selects).'),
     'Own offense beaten by a reversal': ('Offense', 'Pressure beaten by reversals',
         'Respect their meter: block or bait the reversal when they have Drive or super and the read is likely (Defense & Offense 101).'),
     'Jumped in on (no anti-air)': ('Defense', 'Jump-ins not anti-aired',
-        'Anti-air with 2MP/5HP or Cannon Spike; watch for the jump after your blocked 2MK (How to Jump, Reactions).'),
+        'Anti-air with {aa}; watch for the jump after your blocked strings (How to Jump, Reactions).'),
     'Drive Rush / Drive Impact': ('Neutral', 'Hit out of your Drive Rush or by their Drive Impact',
         'Drive Rush after a confirmed hit; answer their raw Drive Impact with your own (Dealing with Drive Rush, Reactions).'),
 }
@@ -221,6 +257,9 @@ def build_set(sid, order, key, D):
     for h in theirs:
         lens[h['lens'] or 'Unclear / super'].append(h)
     leaks = sorted(((k, v) for k, v in lens.items() if k in LENS_FIX), key=lambda kv: -sum(h['damage'] for h in kv[1]))
+    fchar = char(s['focus_char'])
+    kctx = kit_context(fchar, mine, theirs, aa[ME])
+    lf = lambda k: tuple(x.format(**kctx) for x in LENS_FIX[k])
     starters = C.defaultdict(list)
     for h in mine:
         starters[h['starter']].append(h)
@@ -251,11 +290,11 @@ def build_set(sid, order, key, D):
     for i, p in enumerate((ME, opp)):
         a, lean, conf, e_ = arche(p)
         if p == ME:
-            cn = 'What costs you in this set: ' + (', '.join(LENS_FIX[k][1].lower() for k, _ in leaks[:2]) or 'nothing stands out') + '.'
+            cn = 'What costs you in this set: ' + (', '.join(lf(k)[1].lower() for k, _ in leaks[:2]) or 'nothing stands out') + '.'
         else:
             cn = 'How to beat this: ' + ('block their early presses and frame-trap them' if T[p]['after block']['press'] > T[p]['after block']['nothing'] else 'they hold block: throw them and take their Drive') \
                  + ('; anti-air their jumps' if jumps[p] >= 6 else '') + ('; throw their Drive Parry' if dp[p] >= 8 else '') + '.'
-        arch.append(dict(arch_id=f'{sid}-A{i + 1}', set_id=sid, player=p, character='Cammy' if p == ME else oppc, archetype=a, lean=lean, confidence=conf,
+        arch.append(dict(arch_id=f'{sid}-A{i + 1}', set_id=sid, player=p, character=fchar if p == ME else oppc, archetype=a, lean=lean, confidence=conf,
                          evidence=e_, doc_risk_tolerance='—', doc_temperament='—', counter_note=cn))
 
     # ---- habits
@@ -273,7 +312,7 @@ def build_set(sid, order, key, D):
         H(player=ME, kind='Strength', area='Offense', habit='Throws landed', seen=ats(thr[ME], 5), times=len(thr[ME]),
           fix=f"{len(thr[ME])} throws landed vs {len(techs[opp])} teched. Keep throwing until they tech twice in a row (Improving Shimmy).", origin='Game data', confidence='High')
     for k, v in leaks[:3]:
-        area, name, fx = LENS_FIX[k]
+        area, name, fx = lf(k)
         dmg = sum(h['damage'] for h in v)
         if dmg < 1500 and len(v) < 3:
             continue
@@ -281,7 +320,7 @@ def build_set(sid, order, key, D):
           fix=f"{fmt(dmg)} damage ({dmg / max(1, taken):.0%} of what you took). {fx}", origin='Game data (what you were doing when hit)', confidence='High' if len(v) >= 3 else 'Medium')
     if len(aa[opp]) > len(aa[ME]) + 1:
         H(player=ME, kind='Leak', area='Anti-air', habit=f'Anti-airs {len(aa[ME])} vs {len(aa[opp])}', seen=ats(aa[opp], 6), times=len(aa[opp]),
-          fix=f"You jumped forward {jumps[ME]} times and dive kicked about {dives} times; they anti-aired {len(aa[opp])}.", origin='Game data (anti-air)', confidence='High')
+          fix=f"You jumped forward {jumps[ME]} times" + (f" and dive kicked about {dives} times" if DIVE_KICK.get(fchar) else '') + f"; they anti-aired {len(aa[opp])}.", origin='Game data (anti-air)', confidence='High')
     if burn[ME]:
         H(player=ME, kind='Leak', area='Drive', habit=f'Burned out {len(burn[ME])}×', seen='; '.join(f"G{next(g['game_no'] for g in games if g['game_id'] == e['game_id'])} R{e['round']} @{e['round_timer']} ({e['note']})" for e in burn[ME]),
           times=len(burn[ME]), fix=f"{dr[ME]} raw / pressure Drive Rushes and {dp[ME]} Drive Parries in the set. Keep 2 bars when behind; Drive Rush after a hit (Holistic Lens).", origin='Game data (burnout flag)', confidence='High')
@@ -315,7 +354,7 @@ def build_set(sid, order, key, D):
         add('set', 'Defense', 'Worked well', r, f'{len(aa[ME])} anti-airs', 'Their jumps were answered.', ats(aa[ME], 4), 'How to Jump', 'High'); r += 1
     r = 1
     for k, v in leaks[:3]:
-        area, name, fx = LENS_FIX[k]
+        area, name, fx = lf(k)
         dmg = sum(h['damage'] for h in v)
         add('set', area if area in ('Neutral', 'Offense', 'Defense') else 'Neutral', 'To improve', r, name, f"{len(v)} hits for {fmt(dmg)} ({dmg / max(1, taken):.0%} of your damage taken).", ats(v, 4), 'See fixes', 'High' if len(v) >= 3 else 'Medium', fx); r += 1
     if burn[ME]:
@@ -338,7 +377,7 @@ def build_set(sid, order, key, D):
             if h['victim'] == ME and h['lens'] in LENS_FIX:
                 gl[h['lens']].append(h)
         for i, (k, v) in enumerate(sorted(gl.items(), key=lambda kv: -sum(h['damage'] for h in kv[1]))[:2]):
-            add(g['game_id'], LENS_FIX[k][0] if LENS_FIX[k][0] in ('Neutral', 'Offense', 'Defense') else 'Neutral', 'To improve', i + 1, LENS_FIX[k][1],
+            add(g['game_id'], lf(k)[0] if lf(k)[0] in ('Neutral', 'Offense', 'Defense') else 'Neutral', 'To improve', i + 1, lf(k)[1],
                 f"{len(v)} hits, {fmt(sum(h['damage'] for h in v))}.", ats(v, 3), '—', 'Medium')
         gm = C.defaultdict(list)
         for h in gh:
@@ -363,7 +402,7 @@ def build_set(sid, order, key, D):
                 evidence='hits, events')]
     fx, tr = [], []
     for i, (k, v) in enumerate(leaks[:3], 1):
-        area, name, f_ = LENS_FIX[k]
+        area, name, f_ = lf(k)
         fx.append(dict(fix_id=f'{sid}-X{i}', set_id=sid, player=ME, rank=i, fix=name, drill=f_, why=f"{len(v)} hits, {fmt(sum(h['damage'] for h in v))} damage."))
     for i, (b, m) in enumerate((('Primary 50%', 30), ('Secondary 25%', 15), ('Free play 25%', 15))):
         if i < len(fx):
