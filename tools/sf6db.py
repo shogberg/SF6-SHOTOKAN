@@ -177,7 +177,7 @@ def resource_row(k, r, names):
 def ingest_set(con, outdir, meta):
     """meta: set_key, focus (name), played_date, ranked, review ('Full'/'Quick'), format, note, dashboard,
     games_missing, game_times [..], focus_mr [..] (per game, optional), reads [rows], habits [rows] (default: review_docs archetypes / habits), source (reads/habits origin),
-    review_docs {dataset: rows} (hand-written Full-review content, kept across re-ingests), dash {"dashboard": "wip", "set_no": N} (stable Set N)."""
+    review_docs {dataset: rows} (hand-written Full-review content, kept across re-ingests), dash {"dashboard": "quick-dashboard", "set_no": N} (stable Set N)."""
     L = lambda n: json.load(open(os.path.join(outdir, n + '.json')))
     hits, events, timings, games = L('hits'), L('events'), L('timings'), L('games')
     infos = {}

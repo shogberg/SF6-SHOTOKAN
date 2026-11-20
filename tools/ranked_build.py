@@ -1,7 +1,7 @@
-"""Ranked FT2 sets (.shog, Cammy) -> WIP dashboard data.
+"""Ranked FT2 sets (.shog, Cammy) -> quick-dashboard data.
 
 Reads analyzer output in ranked/a/<key>/ for every set in SETS (built from log.tsv),
-writes ranked/data/*.json: per-set rows tagged with set_id (continuing after the WIP's
+writes ranked/data/*.json: per-set rows tagged with set_id (continuing after the quick-dashboard's
 Set 1 and Set 2) plus overview datasets. Per-set notes are generated from capture stats.
 """
 import json, os, ast, re, collections as C

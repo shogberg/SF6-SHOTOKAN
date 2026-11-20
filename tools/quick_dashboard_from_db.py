@@ -1,8 +1,8 @@
-"""Work-in-progress dashboard data, built from the history database (sf6.db).
+"""quick-dashboard data, built from the history database (sf6.db).
 
-  python wip_from_db.py DB OUTDIR [--write-reads]
+  python quick_dashboard_from_db.py DB OUTDIR [--write-reads]
 
-For every set numbered on the 'wip' dashboard (table dashboard_sets) it writes the Set review datasets
+For every set numbered on the 'quick-dashboard' dashboard (table dashboard_sets) it writes the Set review datasets
 (sets, games, hits, events, archetypes, habits, story, story_games, punish, findings, fixes, training).
 Quick reviews are generated from the stored hits / events / timings / usage; Full reviews keep their
 hand-written text from review_docs, with the tiles and tables built from the same stored data.
@@ -10,7 +10,7 @@ hand-written text from review_docs, with the tiles and tables built from the sam
 Then run overview_from_db.py for the Overview tab.
 """
 import json
-import spectra as SP, os, sys, sqlite3, collections as C
+import spectra as SP, os, re, sys, sqlite3, collections as C
 
 ME = '.shog'
 CHAR_ALIAS = {'char_33': 'Yasmine', 'E_Honda': 'E. Honda', 'M_Bison': 'M. Bison', 'Dee_Jay': 'Dee Jay'}
@@ -93,6 +93,27 @@ def kit_context(fchar, mine, theirs, aa_mine):
         unsafe=f" ({', '.join(unsafe)})" if unsafe else '',
         and_dives=f' and {dive}s' if dive else '', or_dive=f' or {dive}' if dive else '',
         dive_note=f', and {dive} high enough to land plus' if dive else '', dive_skill=', DPs and Divekicks' if dive else '')
+
+
+RAW_NAMES = {'SIBERIA': 'Siberian Express', 'PILEDRIVER': 'Screw Piledriver', 'S_Headbutt': 'Sumo Headbutt', 'Gradius': 'Gladius',
+             'CA_HIT': 'Critical Art', 'SOMERSAULT': 'Somersault Kick', 'HK_SHIDEN': 'HK Shiden', 'ATK_S_NGA_Near_CT': 'Command grab', 'Scutum_NGA': 'Scutum (grab)'}
+
+
+def tidy(m):
+    """leftover raw capture names in habit text -> readable (4HP_HIT -> 4HP, PILEDRIVER_EX -> Screw Piledriver (OD))"""
+    m = str(m)
+    od = bool(re.search(r'_(EX|Ex)$', m))
+    m = re.sub(r'_(EX|Ex)$', '', m)
+    m = re.sub(r'^(\d?[LMH][PK]|\d[LMH][PK])_HIT$', r'\1', m)
+    m = re.sub(r'_(Start|START)$', '', m)
+    for k, lab in RAW_NAMES.items():
+        if m == k or m.startswith(k + '_'):
+            m = lab
+            break
+    else:
+        if '_' in m and not m.startswith('ATK_'):
+            m = m.replace('_', ' ').title() if m.isupper() else m.replace('_', ' ')
+    return m + (' (OD)' if od else '')
 
 
 LENS_FIX = {
@@ -305,7 +326,7 @@ def build_set(sid, order, key, D):
         hab.append(dict(habit_id=f'{sid}-H{len(hab) + 1}', set_id=sid, **k))
     for k, v in best[:2]:
         if sum(h['damage'] for h in v) >= 2500:
-            H(player=ME, kind='Strength', area='Offense', habit=f'{k} was a top damage starter', seen=ats(v, 5), times=len(v),
+            H(player=ME, kind='Strength', area='Offense', habit=f'{tidy(k)} was a top damage starter', seen=ats(v, 5), times=len(v),
               fix=f"{len(v)} hits for {fmt(sum(h['damage'] for h in v))} damage. Keep it.", origin='Game data', confidence='High')
     if len(ch[ME]) >= 4:
         H(player=ME, kind='Strength', area='Offense', habit='Counter hits in pressure', seen=ats(ch[ME], 5), times=len(ch[ME]),
@@ -339,7 +360,7 @@ def build_set(sid, order, key, D):
           times=ab['n'], fix='Pressing on frame 0 is beaten by frame traps; holding is beaten by throws. Mix it based on what they do after their strings.', origin='Game data (timings) + Stagger Pressure', confidence='Medium')
     for k, v in obest[:2]:
         if sum(h['damage'] for h in v) >= 2000:
-            H(player=opp, kind='Strength', area='Offense', habit=f'{k} was their top damage starter', seen=ats(v, 5), times=len(v),
+            H(player=opp, kind='Strength', area='Offense', habit=f'{tidy(k)} was their top damage starter', seen=ats(v, 5), times=len(v),
               fix=f"{fmt(sum(h['damage'] for h in v))} damage. (How to beat it) learn its range and answer it in the lab.", origin='Game data', confidence='High')
     oab = T[opp]['after block']
     if oab['n'] >= 6:
@@ -437,7 +458,7 @@ def main(db, out, write_reads=False):
     os.makedirs(out, exist_ok=True)
     con = sqlite3.connect(db); con.row_factory = sqlite3.Row
     allD = C.defaultdict(list); allS = []
-    for r in con.execute("SELECT set_key, set_no FROM dashboard_sets WHERE dashboard='wip' ORDER BY set_no").fetchall():
+    for r in con.execute("SELECT set_key, set_no FROM dashboard_sets WHERE dashboard='quick-dashboard' ORDER BY set_no").fetchall():
         key, no = r['set_key'], r['set_no']
         sid = f'Set {no}'
         D = load_set(con, key)
@@ -461,7 +482,7 @@ def main(db, out, write_reads=False):
         elif write_reads:
             me_id = con.execute('SELECT player_id FROM players WHERE name=?', (ME,)).fetchone()[0]
             pid = {ME: me_id, D['opp']: D['s']['opp_player_id']}
-            src = f'generated from capture stats (Work-in-progress dashboard, {sid})'
+            src = f'generated from capture stats (quick-dashboard, {sid})'
             con.execute('DELETE FROM reads WHERE set_key=?', (key,)); con.execute('DELETE FROM habits WHERE set_key=?', (key,))
             for a in d['archetypes']:
                 con.execute('INSERT INTO reads VALUES (?,?,?,?,?,?,?,?,?,?,?)', (key, pid[a['player']], a['character'], a['archetype'], a['lean'], a['confidence'],

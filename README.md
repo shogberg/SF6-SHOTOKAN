@@ -192,7 +192,7 @@ When a player has history in the database, the dashboard compares this set with 
 |---|---|
 | `tools/analyze_capture.py` | Turns REFramework capture files into review datasets (hits, events, parries, resources, timings). |
 | `tools/sf6db.py`, `rank.py`, `spectra.py`, `behavior.py`, `beh_cache.py` | The history database (SQLite) and the player spectra and behaviour stats. |
-| `tools/wip_from_db.py`, `overview_from_db.py`, `profiles_from_db.py`, `sf6db_export.py`, `ranked_build.py` | Build dashboard datasets, overviews and player profiles from the database. |
+| `tools/quick_dashboard_from_db.py`, `overview_from_db.py`, `profiles_from_db.py`, `sf6db_export.py`, `ranked_build.py` | Build dashboard datasets, overviews and player profiles from the database. |
 | `tools/standalone.py`, `standalone_head.html`, `standalone_shim.js`, `summary_md.py`, `check_page.py` | Offline HTML copies of dashboards, summaries and page checks. |
 | `tools/drive_contact.py`, `drive_measure.py` | Drive gauge measurement helpers. |
 | `tools/base_damage.json`, `tools/enums.json` | Base damage per move and the game enums the analyzer reads. |

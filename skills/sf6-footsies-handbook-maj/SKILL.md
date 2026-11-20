@@ -106,7 +106,7 @@ Good fundamentals can be countered once they're predictable, so hide your patter
 - **SF6:**
   - Drive Impact goes through fireballs.
   - Drive Parry and Perfect Parry on fireballs gain Drive (a perfect parry gives an advantage).
-  - OD moves and some supers are projectile-invincible. Cammy's SA3 is anti-projectile (1-13f fully invincible); see the G1 R3 Critical Art through Sand Blast in the work-in-progress review.
+  - OD moves and some supers are projectile-invincible. Cammy's SA3 is anti-projectile (1-13f fully invincible); see the G1 R3 Critical Art through Sand Blast in the quick-dashboard review.
   - For Cammy, who has no fireball, the answers are: walk and block (bulldog), stuff it up close with fast pokes, parry it for Drive, jump only against far, slow fireballs, Drive Rush once they've committed, and save SA3 or CA for the fireball.
 
 ## Supplement B: avoiding footsies

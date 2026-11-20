@@ -1,6 +1,6 @@
-"""Overview tab of the work-in-progress dashboard, computed from the history database.
+"""Overview tab of the quick-dashboard, computed from the history database.
 
-  python overview_from_db.py DB OUTDIR      # run after wip_from_db.py (reads OUTDIR/stats.json and sets.json)
+  python overview_from_db.py DB OUTDIR      # run after quick_dashboard_from_db.py (reads OUTDIR/stats.json and sets.json)
 
 Writes ov_sets, overview (patterns across sets), gameplan and ov_training. Every number in the text is
 computed from sf6.db, so the Overview updates when a set is added or re-analysed.
