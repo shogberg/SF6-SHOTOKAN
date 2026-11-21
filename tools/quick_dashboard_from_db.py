@@ -85,7 +85,7 @@ def kit_context(fchar, mine, theirs, aa_mine):
     aa = top(aa_mine, 'starter')[:2]
     wp = top([h for h in mine if h['situation'] in ('neutral', 'punish') and h['hit_kind'] != 'throw'
               and ground(h['starter'])], 'starter')[:2]
-    unsafe = top([h for h in theirs if h['lens'] == 'Unsafe move punished' and h.get('victim_move') != 'Throw attempt'], 'victim_move')
+    unsafe = top([h for h in theirs if h['lens'] == 'Unsafe move punished' and h.get('victim_move') not in ('Throw attempt', 'Throw tech attempt')], 'victim_move')
     dive = DIVE_KICK.get(fchar)
     return dict(
         aa=' or '.join(aa) + ' (your anti-airs that landed this set)' if aa else kd.get('aa', f"{fchar}'s most reliable anti-air"),

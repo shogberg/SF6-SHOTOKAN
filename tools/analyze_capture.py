@@ -325,6 +325,9 @@ def analyze(path, game_no, focus):
         vst_prev = [x.get('act_st_name') for x in lookback(h['frame'], v, 40)]
         vhist_prev = [x.get('blockstun') or 0 for x in lookback(h['frame'], v, 25)]
         ahist_prev = [x.get('blockstun') or 0 for x in lookback(h['frame'], a, 35)]
+        # a throw pressed while defending (just out of blockstun or getting up) is a throw tech attempt, not an offensive throw
+        if vmove_before == 'Throw attempt' and (any(bb > 0 for bb in vhist_prev) or 'GETUP' in vst_prev[-30:]):
+            vmove_before = 'Throw tech attempt'
         # kind
         is_throw = move.startswith(('NGA', 'NGS')) or any(abs(t - h['frame']) <= 8 for t in throw_frames[a])
         kind = 'throw' if is_throw else 'clean hit'

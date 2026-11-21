@@ -90,7 +90,7 @@ def main(db, out):
     mid_top = sum(1 for s in S if top_leak(s) == 'Pressed at mid range')
     big_mid = [s['opp'] for s in S if share(s, 'Pressed at mid range') >= 0.4]
     thrown = [h for h in took if h['hit_kind'] == 'throw']; walk_thr = [h for h in walk if h['hit_kind'] == 'throw']
-    my_thr_pun = [h for h in took if h['victim_move'] == 'Throw attempt']
+    my_thr_pun = [h for h in took if h['victim_move'] in ('Throw attempt', 'Throw tech attempt')]
     walk_st = C.Counter(h['starter'] for h in walk).most_common(3)
     aa_me = [h for h in dealt if h['anti_air']]; aa_them = [h for h in took if h['anti_air']]
     aa_best = max(S, key=lambda s: s['aa_me']); low_aa = sum(1 for s in S if s['aa_me'] <= 1)
