@@ -338,6 +338,12 @@ def analyze(path, game_no, focus):
         a_frame_in_move = (f.get(a) or {}).get('action_frame') or 0
         recent_a = [x.get('act_st_name') for x in lookback(h['frame'], a, a_frame_in_move + 4)]
         reversal = 'GETUP' in recent_a[: 6] if recent_a else False
+        # also a reversal: a special / super started on reversal timing straight out of blockstun
+        if not reversal and move.startswith(('SPA_', 'SA', 'CAA')):
+            pre = lookback(h['frame'], a, a_frame_in_move + 4)[: 6]
+            reversal = any((x.get('blockstun') or 0) > 0 for x in pre[:3])
+        if reversal and not is_throw:
+            kind = 'reversal'
         # situation
         v_recent_getup = 'GETUP' in vst_prev[-40:]
         v_recent_block = any(b > 0 for b in vhist_prev)
