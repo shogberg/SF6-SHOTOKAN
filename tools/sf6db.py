@@ -132,7 +132,7 @@ def player(con, name, cfn_id=None, seen=None):
     return pid
 
 
-def set_stats(hits, events, timings, games, pids):
+def set_stats(hits, events, timings, games, pids, presses=None):
     """Per-player metrics for trend tracking (ints and shares)."""
     out = {}
     for name, pid in pids.items():
@@ -145,6 +145,9 @@ def set_stats(hits, events, timings, games, pids):
                  throw_techs=sum(e['player'] == name and e['type'] == 'throw tech' for e in events),
                  perfect_parries=sum(e['player'] == name and e['type'] == 'perfect parry' for e in events),
                  drive_reversals=sum(e['player'] == name and e['type'] == 'drive reversal' for e in events))
+        if presses:   # button economy (Theory #4): all presses and decision presses (opponent not being hit / knocked down)
+            pr = [x for x in presses if x['player'] == name]
+            m['presses'] = sum(x['presses'] for x in pr); m['decision_presses'] = sum(x['decision_presses'] for x in pr); m['press_rounds'] = len(pr)
         for t in DR_TYPES:
             m[t.replace(' ', '_')] = sum(e['player'] == name and e['type'] == t for e in events)
         for ev in ('after block', 'wake-up'):
@@ -180,6 +183,7 @@ def ingest_set(con, outdir, meta):
     review_docs {dataset: rows} (hand-written Full-review content, kept across re-ingests), dash {"dashboard": "quick-dashboard", "set_no": N} (stable Set N)."""
     L = lambda n: json.load(open(os.path.join(outdir, n + '.json')))
     hits, events, timings, games = L('hits'), L('events'), L('timings'), L('games')
+    presses = L('presses') if os.path.exists(os.path.join(outdir, 'presses.json')) else None
     infos = {}
     for n, g in enumerate(games):
         infos[g['game_id']] = load_info(meta['captures_local'][g['game_id']])
@@ -240,7 +244,7 @@ def ingest_set(con, outdir, meta):
     if os.path.exists(f'{outdir}/parries.json'):
         cur.executemany('INSERT INTO parries VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)', [(k, x['game_id'], x['round'], x['round_timer'], names[x['player']], x['frames'], x['drive_before'], x['cost'],
                                                                                 x['hits_parried'], x['regained'], x['net'], int(bool(x['perfect'])), x['next']) for x in L('parries')])
-    for pid, m in set_stats(hits, events, timings, games, names).items():
+    for pid, m in set_stats(hits, events, timings, games, names, presses).items():
         cur.executemany('INSERT INTO set_stats VALUES (?,?,?,?)', [(k, pid, a, b) for a, b in m.items()])
     rep = os.path.join(outdir, 'report.md')
     if os.path.exists(rep):

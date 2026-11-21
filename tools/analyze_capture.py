@@ -661,13 +661,28 @@ def analyze(path, game_no, focus):
                                     regained=round(regain / 10000, 2), net=round((regain - cost) / 10000, 2), perfect=perfect, next=nxt))
             k += 1
 
-    return dict(info=info, rows=rows, events=events, winners=winners, timings=timings, usage=usage, side_name=side_name, side_char=side_char, resources=resources, parries=parries)
+    # button economy (Theory #4): new attack / special / super / throw states per player per round. A press is a
+    # "decision press" when the opponent isn't being hit, knocked down or getting up, so combo and oki presses
+    # (which the winning player gets more of) don't inflate the count. Chained buttons in one combo count once.
+    ACT_ST, BUSY_ST = ('ATCK', 'SPECIAL', 'SUPER', 'THROW'), ('DAMAGE', 'GETUP', 'DOWN', 'NOKI')
+    pc = C.defaultdict(C.Counter)
+    for side in ('p1', 'p2'):
+        o = other[side]
+        for k in range(1, len(fr)):
+            st_, pst = fr[k][side].get('act_st_name'), fr[k - 1][side].get('act_st_name')
+            if st_ in ACT_ST and pst not in ACT_ST and fr[k]['round'] == fr[k - 1]['round']:
+                key_ = (side_name[side], fr[k]['round'] + 1)
+                pc[key_]['presses'] += 1
+                if fr[k][o].get('act_st_name') not in BUSY_ST: pc[key_]['decision_presses'] += 1
+    presses = [dict(game_id=rid, round=r_, player=p_, presses=c_['presses'], decision_presses=c_['decision_presses']) for (p_, r_), c_ in sorted(pc.items(), key=lambda x: (x[0][1], x[0][0]))]
+
+    return dict(info=info, rows=rows, events=events, winners=winners, timings=timings, usage=usage, side_name=side_name, side_char=side_char, resources=resources, parries=parries, presses=presses)
 
 
 def main():
     out, focus, fmt, paths = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4:]
     os.makedirs(out, exist_ok=True)
-    games, hits, events, timings, report, resources, parries = [], [], [], [], [], [], []
+    games, hits, events, timings, report, resources, parries, presses = [], [], [], [], [], [], [], []
     score = C.Counter(); opp = None
     for g, p in enumerate(paths, 1):
         A = analyze(p, g, focus)
@@ -677,7 +692,7 @@ def main():
         games.append(dict(game_id=A['info']['replay_id'], set_id='Set 1', game_no=g, winner=winner,
                           round_score=f"{rs[focus]}-{rs[opp]}", round_winners=', '.join(A['winners']),
                           set_score_after=f"{score[focus]}-{score[opp]}"))
-        hits += A['rows']; events += A['events']; timings += A['timings']; resources += [dict(r, set_id='Set 1') for r in A['resources']]; parries += [dict(x, set_id='Set 1') for x in A['parries']]
+        hits += A['rows']; events += A['events']; timings += A['timings']; resources += [dict(r, set_id='Set 1') for r in A['resources']]; parries += [dict(x, set_id='Set 1') for x in A['parries']]; presses += [dict(x, set_id='Set 1') for x in A['presses']]
         report.append((A, g))
     key = lambda n: re.sub(r'[^a-z0-9]', '', n.lower())
     winner = max(score, key=score.get)
@@ -685,7 +700,7 @@ def main():
                  **{key(focus) + '_games': score[focus], key(opp) + '_games': score[opp]}, winner=winner,
                  progression=', '.join(x['set_score_after'] for x in games), max_deficit_overcome=None, note=None)]
     for i, e in enumerate(events, 1): e['event_id'] = f'E{i:02d}'; e['set_id'] = 'Set 1'
-    for n, obj in (('sets', sets), ('games', games), ('hits', hits), ('events', events), ('timings', timings), ('resources', resources), ('parries', parries)):
+    for n, obj in (('sets', sets), ('games', games), ('hits', hits), ('events', events), ('timings', timings), ('resources', resources), ('parries', parries), ('presses', presses)):
         json.dump(obj, open(f'{out}/{n}.json', 'w'), indent=1, ensure_ascii=False)
     # ---- report for writing the story
     L = []
