@@ -412,14 +412,27 @@ def analyze(path, game_no, focus):
 
     # ---- events
     events = []
+
+    def lethal_burnout(side, n):
+        """True when the burnout starts inside the player's own combo and that combo kills (the opponent is in hitstun from
+        the burnout until their HP hits 0, in the same round): spending everything for lethal isn't counted as a burnout."""
+        o = 'p2' if side == 'p1' else 'p1'
+        if not any(fr[j][o].get('act_st_name') == 'DAMAGE' for j in range(n, min(len(fr), n + 10))): return False
+        for j in range(n, min(len(fr), n + 360)):
+            if fr[j]['round'] != fr[n]['round']: return False
+            if fr[j][o]['hp'] <= 0: return True
+            if j > n + 10 and fr[j][o].get('act_st_name') != 'DAMAGE' and fr[j][o]['hp'] > 0: return False
+        return False
     for side in ('p1', 'p2'):
         start = None
-        for f in fr:
+        for n, f in enumerate(fr):
             b = bool(f[side]['burnout'])
-            if b and start is None: start = f
+            if b and start is None: start, sn = f, n
             if not b and start is not None:
+                lethal = lethal_burnout(side, sn)
                 events.append(dict(game_id=rid, round=start['round'] + 1, round_timer=start['round_timer'], frame=start['i'],
-                                   player=side_name[side], type='burnout', note=f"{(f['i'] - start['i']) / 60:.1f}s"))
+                                   player=side_name[side], type='lethal burnout' if lethal else 'burnout',
+                                   note=f"{(f['i'] - start['i']) / 60:.1f}s" + (' (spent for a combo that killed; not counted as a burnout)' if lethal else '')))
                 start = None
     for typ, lst in (('perfect parry', perfect_events), ('throw tech', tech_events), ('drive reversal', dr_events)):
         for p, fi, rnd in lst:

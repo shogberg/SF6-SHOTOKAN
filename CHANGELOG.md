@@ -2,6 +2,9 @@
 
 Notable changes to the SHOTOKAN review tooling and skills, newest first. Every push adds its changes here.
 
+## 2026-11-22
+- Burnouts: a burnout that starts inside the player's own combo that kills (the opponent stays in hitstun until their HP hits 0) is logged as a `lethal burnout` and no longer counts as a burnout in counts, tiles, spectra or advice. `tools/lethal_backfill.py` relabels burnouts already in a history database.
+
 ## 2026-11-21
 - Skills: added `sf6-coach-coosco` (Coosco's replay-breakdown lessons) and `sf6-character-notes` (per-character baselines and notes).
 - Skills: added `sf6-coach-shog` (coach .shog's rules and theories). `sf6-coach-doctaafrikan` is now kept local and gitignored.
