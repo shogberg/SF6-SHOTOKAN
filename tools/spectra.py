@@ -88,7 +88,7 @@ def raw(player, games, hits, tim, ev, use, beh=None):
     for gi in range(1, len(gids)):
         before = gids[:gi]
         pun = C.Counter(_core(h['victim_move']) for h in hits if h['victim'] == player and h['game_id'] in before and h['victim_move']
-                        and (h['hit_kind'] in ('counter hit', 'punish counter') or h['lens'] in ('Unsafe move punished', 'Own offense beaten by a reversal', 'Drive Rush / Impact checked'))
+                        and (h['hit_kind'] in ('counter hit', 'punish counter') or h['lens'] in ('Unsafe move punished', 'Whiff punished', 'Own offense beaten by a reversal', 'Drive Rush / Impact checked'))
                         and not str(h['victim_move']).startswith(SKIP_MOVES) and _core(h['victim_move']) not in LIGHTS)
         rb = sum(rounds[g] for g in before) or 1; rg = rounds[gids[gi]] or 1
         cu = [C.Counter() for _ in use]

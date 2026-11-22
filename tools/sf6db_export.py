@@ -6,8 +6,8 @@ Tabs: set_metrics, player_reads, opponents, char_matchups (only sets where the f
 """
 import json, os, sqlite3, sys, collections as C
 
-LEAKS = [('Pressed at mid range', 'Pressed at mid range'), ('Walked in', 'Walked in'), ('Jumped', 'Jumped'),
-         ('Pressed in their pressure / on wake-up', 'Pressed in their pressure'), ('Unsafe move punished', 'Unsafe move punished'),
+LEAKS = [('Counter-hit at mid range', 'Counter-hit at mid range'), ('Whiff punished', 'Whiff punished'), ('Walked in', 'Walked in'), ('Jumped', 'Jumped'),
+         ('Challenging pressure', 'Challenging pressure'), ('Challenging okizeme', 'Challenging okizeme'), ('Unsafe move punished', 'Unsafe move punished'),
          ('Blocking, opened up', 'Opened up while blocking'), ('Jumped in on (no anti-air)', "Jump-ins not anti-aired")]
 
 

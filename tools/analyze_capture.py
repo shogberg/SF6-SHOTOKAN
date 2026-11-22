@@ -367,9 +367,11 @@ def analyze(path, game_no, focus):
         elif vst in ATTACK_STATES or vst == 'PARRY':
             vmove = mname(names, v, (f.get(v) or {}).get('action_id'))
             if vmove.startswith('ATK_CTA'): lens = 'Drive Rush / Impact checked'
-            elif a_recent_block or kind == 'punish counter': lens = 'Unsafe move punished'
-            elif v_recent_block or v_recent_getup: lens = 'Pressed in their pressure / on wake-up'
-            else: lens = 'Pressed at mid range'
+            elif a_recent_block: lens = 'Unsafe move punished'            # their move was blocked, then punished
+            elif v_recent_getup: lens = 'Challenging okizeme'             # pressed on wake-up into the oki
+            elif v_recent_block: lens = 'Challenging pressure'            # pressed in their blockstring / pressure
+            elif kind == 'punish counter': lens = 'Whiff punished'        # caught in the recovery of a whiffed move
+            else: lens = 'Counter-hit at mid range'                       # pressed in neutral, counter-hit on startup
         elif vst in ('DEF', 'JDEF') or v_recent_block: lens = 'Blocking, opened up'
         elif vst in MOVE_STATES: lens = 'Walked in'
         else: lens = 'Unclear / super'
@@ -390,7 +392,7 @@ def analyze(path, game_no, focus):
             if r['first_hitstun'] >= lo + 2 and len(set(by[(r['attacker'], r['starter'])])) > 1:
                 r['hit_kind'] = 'punish counter'
                 if r['situation'] == 'neutral': r['situation'] = 'punish'
-                if r['lens'] == 'Pressed at mid range': r['lens'] = 'Unsafe move punished'
+                if r['lens'] == 'Counter-hit at mid range': r['lens'] = 'Whiff punished'
 
     # ---- events
     events = []

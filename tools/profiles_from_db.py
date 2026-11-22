@@ -47,7 +47,8 @@ RULES = {
     ('Resource use', 1): 'they sit on Drive and super: respect their reversal and parry, and don\'t gamble into full meter',
 }
 
-LENS_SHORT = {'Pressed in their pressure / on wake-up': 'pressing in pressure or on wake-up', 'Pressed at mid range': 'pressing at mid range',
+LENS_SHORT = {'Challenging pressure': 'challenging pressure', 'Challenging okizeme': 'challenging okizeme', 'Counter-hit at mid range': 'getting counter-hit at mid range', 'Whiff punished': 'getting whiff punished',
+              'Pressed in their pressure / on wake-up': 'pressing in pressure or on wake-up', 'Pressed at mid range': 'pressing at mid range',
               'Walked in': 'walking in', 'Teched a throw': 'teching throws', 'Blocking, opened up': 'getting opened up while blocking',
               'Jumped': 'jumping', 'Jumped in on (no anti-air)': 'being jumped in on', 'Own offense beaten by a reversal': 'their offense beaten by a reversal',
               'Drive Rush / Impact checked': 'Drive Rush / Impact getting checked', 'Unsafe move punished': 'unsafe moves punished', 'Unclear / super': 'supers or unclear'}

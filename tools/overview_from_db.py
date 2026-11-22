@@ -12,8 +12,8 @@ JUMPS = {'BAS_JUMP_F_START': 'forward jump (takeoff)', 'BAS_JUMP_F_AIR': 'forwar
 mv = lambda n: JUMPS.get(n) or _mv(n)
 
 ME = '.shog'
-LEAK = {'Pressed at mid range': 'Buttons at mid range', 'Walked in': 'Walking in', 'Jumped': 'Jumps / dive kicks',
-        'Pressed in their pressure / on wake-up': 'Pressing in their pressure', 'Unsafe move punished': 'Unsafe moves',
+LEAK = {'Counter-hit at mid range': 'Counter-hit at mid range', 'Whiff punished': 'Whiff punished', 'Walked in': 'Walking in', 'Jumped': 'Jumps / dive kicks',
+        'Challenging pressure': 'Challenging pressure', 'Challenging okizeme': 'Challenging okizeme', 'Unsafe move punished': 'Unsafe moves',
         'Blocking, opened up': 'Opened up', 'Jumped in on (no anti-air)': 'Jump-ins not anti-aired', 'Unclear / super': 'Supers',
         'Own offense beaten by a reversal': 'Reversals', 'Drive Rush / Impact checked': 'Drive Rush / Impact'}
 NORMALS = ('LP', 'MP', 'HP', 'LK', 'MK', 'HK')
@@ -80,15 +80,15 @@ def main(db, out):
 
     # ---------------------------------------------------------------- facts
     neutral_t = dmg([h for h in took if h['situation'] == 'neutral']); neutral_d = dmg([h for h in dealt if h['situation'] == 'neutral'])
-    mid = lens('Pressed at mid range'); walk = lens('Walked in'); jmp = lens('Jumped'); press = lens('Pressed in their pressure / on wake-up')
+    mid = lens('Counter-hit at mid range'); walk = lens('Walked in'); jmp = lens('Jumped'); press = lens('Challenging pressure') + lens('Challenging okizeme')
     noaa = lens('Jumped in on (no anti-air)')
     btn = C.Counter(h['victim_move'] for h in took if h['victim_move'] and h['victim_move'][-2:] in NORMALS and h['lens'] != 'Jumped')
     top_btns = [b for b, _ in btn.most_common(3)]
     b0 = top_btns[0] if top_btns else '—'
     b0h = [h for h in took if h['victim_move'] == b0]
     b0_lens = C.Counter(h['lens'] for h in b0h)
-    mid_top = sum(1 for s in S if top_leak(s) == 'Pressed at mid range')
-    big_mid = [s['opp'] for s in S if share(s, 'Pressed at mid range') >= 0.4]
+    mid_top = sum(1 for s in S if top_leak(s) == 'Counter-hit at mid range')
+    big_mid = [s['opp'] for s in S if share(s, 'Counter-hit at mid range') >= 0.4]
     thrown = [h for h in took if h['hit_kind'] == 'throw']; walk_thr = [h for h in walk if h['hit_kind'] == 'throw']
     my_thr_pun = [h for h in took if h['victim_move'] in ('Throw attempt', 'Throw tech attempt')]
     walk_st = C.Counter(h['starter'] for h in walk).most_common(3)
@@ -157,11 +157,11 @@ def main(db, out):
 
     add('Leak', 'Neutral', 'Neutral decides your sets, and your buttons at mid range are the biggest leak',
         f"{pct(neutral_t, tot_t)} of the damage you took came in neutral (your opponents took {pct(neutral_d, tot_d)} of theirs there). The single biggest source: pressing a button at mid range and getting hit first or whiff-punished, {pct(dmg(mid), tot_t)} of all damage taken ({len(mid)} hits, {about(dmg(mid))}). "
-        f"{b0} is the button that gets hit most: {len(b0h)} times for {about(dmg(b0h))} ({b0_lens['Pressed at mid range']} at mid range, {b0_lens['Unsafe move punished']} punished on block or whiff, {b0_lens['Pressed in their pressure / on wake-up']} pressed during their pressure)."
+        f"{b0} is the button that gets hit most: {len(b0h)} times for {about(dmg(b0h))} ({b0_lens['Counter-hit at mid range']} at mid range, {b0_lens['Unsafe move punished']} punished on block, {b0_lens['Whiff punished']} whiff punished, {b0_lens['Challenging pressure'] + b0_lens['Challenging okizeme']} challenging pressure or okizeme)."
         + (f" {', '.join(top_btns[1:])} follow." if len(top_btns) > 1 else ''),
-        f"Damage taken by what you were doing (chart below); 'Pressed at mid range' is the top leak in {mid_top} of {n_sets} sets" + (f" and 40% or more against {', '.join(big_mid)}." if big_mid else '.'),
+        f"Damage taken by what you were doing (chart below); 'Counter-hit at mid range' is the top leak in {mid_top} of {n_sets} sets" + (f" and 40% or more against {', '.join(big_mid)}." if big_mid else '.'),
         f"Pick one or two poke ranges per matchup and stop just outside their 2MK/5MP. Use {b0} as a frame trap up close, not as a neutral poke; at mid range let them press first and whiff-punish with 5HP or 2MK~Drive Rush (Using Pokes, Footsies 101, Footsies Handbook elements on baiting).",
-        seen(lambda s: share(s, 'Pressed at mid range') >= 0.19))
+        seen(lambda s: share(s, 'Counter-hit at mid range') >= 0.19))
     add('Leak', 'Neutral', 'Walking forward into throws and buttons',
         f"{pct(dmg(walk), tot_t)} of damage taken ({len(walk)} hits, {about(dmg(walk))}) came while walking forward: {len(walk_thr)} of those were throws (you were thrown {len(thrown)} times in all, {sum(h['situation'] == 'neutral' for h in thrown)} of them in neutral). "
         f"Separately, {len(my_thr_pun)} of your own throw attempts whiffed or were beaten and got punished for {about(dmg(my_thr_pun))}, about {f(round(dmg(my_thr_pun) / max(1, len(my_thr_pun)), -2))} each.",
@@ -204,7 +204,7 @@ def main(db, out):
             'Keep OD Cannon Spike as a read, but track it: once an opponent blocks one, stop for the rest of the set, and never use it when a punish would kill you or it would burn you out (Defense Equation). For the non-OD ones, practise 623+KK from a knockdown, 10 in a row. Wake-up forward jumps are the riskier habit.',
             seen(lambda s: True), 'Medium')
     add('Pattern', 'Defense', 'After blocking you either press immediately or jump',
-        f"Your first action after blocking: {len(ab_att)} attacks ({len(ab_f0)} of them on frame 0-1), {len(ab_hold)} times you held still, {len(ab_jump)} jumps ({len(ab_fj)} forward). Pressing in their pressure or on wake-up cost {pct(dmg(press), tot_t)} of damage taken ({len(press)} hits).",
+        f"Your first action after blocking: {len(ab_att)} attacks ({len(ab_f0)} of them on frame 0-1), {len(ab_hold)} times you held still, {len(ab_jump)} jumps ({len(ab_fj)} forward). Challenging pressure or okizeme cost {pct(dmg(press), tot_t)} of damage taken ({len(press)} hits).",
         'Timings after blockstun; most frame-0 presses were ' + ', '.join(k for k, _ in ab_btn) + '.',
         'Against frame-trappers, hold block one more beat after their string; against throwers, delay tech. Drop the forward jump out of blockstun (Stagger Pressure, Delay Option Selects).',
         seen(lambda s: s['ab_f0'] >= 6), 'Medium')

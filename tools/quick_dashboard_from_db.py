@@ -117,9 +117,13 @@ def tidy(m):
 
 
 LENS_FIX = {
-    'Pressed in their pressure / on wake-up': ('Defense', 'Pressing during their pressure or on wake-up',
-        'Block one beat longer after a blocked string or meaty; press only after a minus move or on a read (Stagger Pressure, Defense Equation).'),
-    'Pressed at mid range': ('Neutral', 'Buttons at mid range got beaten',
+    'Challenging pressure': ('Defense', 'Challenging their pressure',
+        'Block one beat longer after a blocked string; press only after a minus move or on a read (Stagger Pressure, Defense Equation).'),
+    'Challenging okizeme': ('Defense', 'Challenging their okizeme (pressing on wake-up)',
+        'On wake-up, block or use a real reversal on a read; a wake-up button into a meaty is a guess (Defense Equation, coach .shog wake-up rule).'),
+    'Whiff punished': ('Neutral', 'Whiffed buttons punished',
+        'Space buttons so they reach or don\'t throw them out at that range; walk back after a poke instead of pressing again (Using Pokes, Footsies 101).'),
+    'Counter-hit at mid range': ('Neutral', 'Counter-hit at mid range',
         'Stop at the edge of their poke range and let them press first; whiff-punish with {wp} (Using Pokes, Footsies 101).'),
     'Walked in': ('Neutral', 'Walking into their buttons or throws',
         'Walk forward in small steps and stop outside their best poke; hold a whiff punish instead of walking through it (Footsies 101).'),

@@ -164,6 +164,7 @@ def set_stats(hits, events, timings, games, pids, presses=None):
         for h in took:
             lens[h['lens'] or 'Unclear / super'] += h['damage']; sit[h['situation']] += h['damage']
         for k, v in lens.items(): m['taken_share: ' + k] = round(v / taken, 4) if taken else 0
+        for k, v in lens.items(): m['taken_dmg: ' + k] = v   # raw damage too, so shares can be weighted by how much was taken
         for k, v in sit.items(): m['taken_situation_share: ' + k] = round(v / taken, 4) if taken else 0
         out[pid] = m
     return out
