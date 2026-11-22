@@ -11,7 +11,9 @@ Axes
   (reversal timing). Blocked-again situations (no choice made) are left out. Offense isn't measured here.
 - Adaptability: Inelastic (1) <-> Elastic (5). For moves (not jabs) that got the player counter-hit, punished
   or checked in earlier games, how often they kept using them in later games (per round), weighted by how often each
-  was punished. Needs 2+ games and at least one punished move that was used again or dropped.
+  was punished. Needs 2+ games and at least one punished move that was used again or dropped. Only counted when the
+  plan was losing (lost that game or behind in the set) or the move kept getting punished (2+ times or 2,000+ damage,
+  weighted 1.5x; in a won game only 3,500+ damage from that move counts); keeping a punished move in a winning plan is neutral ("Kept a winning plan", 3/5).
 - Temperament (offense): Impulsive (1) <-> Mindful (5). After the opponent blocks one of their attacks, how often the
   player presses again (attack, jump, Drive Rush) within 3 frames of being free, instead of delaying, walking or waiting.
 - Initiative: Reactive (1) <-> Proactive (5). Share of neutral movement that goes forward, averaged with the share of
@@ -83,13 +85,25 @@ def raw(player, games, hits, tim, ev, use, beh=None):
     t = [x for x in tim if x['player'] == player and not str(x['action']).startswith('blocked')]
     imp = [x for x in t if str(x['action']).split(':')[0] in PRESS and x['frames_until'] is not None and x['frames_until'] <= 2]
     temp = (len(imp) / len(t)) if len(t) >= 8 else None
-    # elasticity
-    num = den = 0.0; moves_seen = C.Counter()
+    # elasticity (Sean, 2026-11-21): reusing a punished move only counts as inelastic when the plan is losing
+    # (lost that game, or behind in the set going into it) or the move keeps getting punished in that game.
+    # Keeping a winning plan is neutral, not inelastic.
+    num = den = 0.0; moves_seen = C.Counter(); kept_winning = C.Counter(); costly = C.Counter()
+    def _pun(h):
+        return (h['victim'] == player and h['victim_move']
+                and (h['hit_kind'] in ('counter hit', 'punish counter') or h['lens'] in ('Unsafe move punished', 'Pressed after turn ended', 'Whiff punished', 'Own offense beaten by a reversal', 'Drive Rush / Impact checked'))
+                and not str(h['victim_move']).startswith(SKIP_MOVES) and _core(h['victim_move']) not in LIGHTS)
+    won = {g['game_id']: (g.get('winner') == player) for g in games}
+    known = all(g.get('winner') for g in games)
     for gi in range(1, len(gids)):
         before = gids[:gi]
-        pun = C.Counter(_core(h['victim_move']) for h in hits if h['victim'] == player and h['game_id'] in before and h['victim_move']
-                        and (h['hit_kind'] in ('counter hit', 'punish counter') or h['lens'] in ('Unsafe move punished', 'Pressed after turn ended', 'Whiff punished', 'Own offense beaten by a reversal', 'Drive Rush / Impact checked'))
-                        and not str(h['victim_move']).startswith(SKIP_MOVES) and _core(h['victim_move']) not in LIGHTS)
+        pun = C.Counter(_core(h['victim_move']) for h in hits if h['game_id'] in before and _pun(h))
+        again = C.Counter(); again_dmg = C.Counter()
+        for h in hits:
+            if h['game_id'] == gids[gi] and _pun(h):
+                again[_core(h['victim_move'])] += 1; again_dmg[_core(h['victim_move'])] += h.get('damage') or 0
+        w_before = sum(won[g] for g in before); behind = w_before < len(before) - w_before
+        losing = (not known) or behind or not won[gids[gi]]
         rb = sum(rounds[g] for g in before) or 1; rg = rounds[gids[gi]] or 1
         cu = [C.Counter() for _ in use]
         for k, u in enumerate(use):
@@ -98,8 +112,16 @@ def raw(player, games, hits, tim, ev, use, beh=None):
             ub = sum(cu[k].get(m, 0) for k in range(gi)) / rb
             if ub <= 0: continue
             ug = cu[gi].get(m, 0) / rg
-            num += w * ug; den += w * ub; moves_seen[m] += w
+            still_costing = again[m] >= 2 or again_dmg[m] >= 2000
+            # in a game they won (and weren't behind), a reused move only counts if it cost a real chunk of life
+            if not losing and again_dmg[m] < 3500:
+                if ug > 0: kept_winning[m] += w
+                continue
+            ww = w * (1.5 if still_costing else 1.0)
+            if still_costing: costly[m] += 1
+            num += ww * ug; den += ww * ub; moves_seen[m] += w
     elas = (num / den) if den > 0 and sum(moves_seen.values()) >= 2 else None
+    elas_winning = elas is None and sum(kept_winning.values()) >= 2
     # risk
     R = sum(rounds.values()) or 1
     U = C.Counter()
@@ -133,14 +155,18 @@ def raw(player, games, hits, tim, ev, use, beh=None):
         elif n >= 5: var_parts.append((n, 0.0))
     var = (sum(n * v for n, v in var_parts) / sum(n for n, _ in var_parts)) if var_parts else None
     ev_ = dict(temperament=(f"{len(imp)} of {len(t)} after-block / wake-up choices were a button, special, jump or parry on reversal timing (0-2 frames)" if temp is not None else 'too few after-block / wake-up situations'),
-               elasticity=(f"in later games, used the moves that got punished at {elas:.0%} of their earlier rate ({', '.join(m for m, _ in moves_seen.most_common(3))})" if elas is not None else 'not enough evidence (one game, or no punished move came up again)'),
+               elasticity=((f"while losing (or while the moves kept costing), used the moves that got punished at {elas:.0%} of their earlier rate ({', '.join(m for m, _ in moves_seen.most_common(3))})"
+                           + (f"; still getting punished for {', '.join(costly)}" if costly else '')
+                           + (f"; kept {', '.join(m for m, _ in kept_winning.most_common(2))} in games they were winning (not counted)" if kept_winning else '')) if elas is not None
+                          else (f"kept a winning plan: reused {', '.join(m for m, _ in kept_winning.most_common(3))} after it got punished, but they were winning and it stopped costing them, so that isn't inelastic" if elas_winning
+                                else 'not enough evidence (one game, or no punished move came up again while losing)')),
                temperament_off=(f"once free after their attack was blocked, pressed again within 3 frames {b['off_imp']} of {b['off_n']} times" if toff is not None else 'too few blocked attacks'),
                initiative=(f"walked / dashed forward in {b['fwd'] / max(1, b['fwd'] + b['back']):.0%} of neutral movement and started {b['starts']} of {b['starts_all']} neutral exchanges" if ini is not None else 'too few neutral exchanges'),
                composure=(f"pressed {comp:.0%} as often after taking a 2,000+ combo or losing a round as otherwise" if comp is not None else 'not enough time after big damage or a lost round'),
                variety=(f"spread of choices after blocking and on wake-up: {var:.0%} of the maximum" if var is not None else 'too few after-block / wake-up choices'),
                resources=(f"{res:.1f} gauge bars spent per round ({b.get('drive_spent', 0) / 10000:.0f} Drive bars, {b.get('super_spent', 0) / 10000:.0f} super bars, {nburn} burnouts over {R} rounds)" if res is not None else 'no frame data'),
                risk=f"{risk:.1f} risky options per round: {wake_rev} wake-up reversals, {U.get('Drive Impact', 0)} Drive Impacts, {U.get('Drive Reversal', 0)} Drive Reversals, {raw_dr} raw Drive Rushes (half weight), {supers} supers, {jumps} forward jumps over {R} rounds")
-    return dict(temperament=temp, temperament_off=toff, elasticity=elas, risk=risk, initiative=ini, composure=comp, variety=var, resources=res), ev_
+    return dict(temperament=temp, temperament_off=toff, elasticity=elas, elasticity_winning=elas_winning, risk=risk, initiative=ini, composure=comp, variety=var, resources=res), ev_
 
 
 def spectra(player, games, hits, tim, ev, use):
@@ -148,6 +174,8 @@ def spectra(player, games, hits, tim, ev, use):
     out = []
     for a in AXES:
         v = vals[a['key']]
+        if v is None and a['key'] == 'elasticity' and vals.get('elasticity_winning'):
+            out.append(dict(a, score=3, label='Kept a winning plan', evidence=evs[a['key']])); continue
         if v is None:
             out.append(dict(a, score=None, label='Not enough evidence', evidence=evs[a['key']])); continue
         b = _bucket(v, CUTS[a['key']])
