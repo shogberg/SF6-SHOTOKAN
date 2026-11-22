@@ -3,6 +3,7 @@
 Notable changes to the SHOTOKAN review tooling and skills, newest first. Every push adds its changes here.
 
 ## 2026-11-21
+- Skills: added `sf6-coach-coosco` (Coosco's replay-breakdown lessons) and `sf6-character-notes` (per-character baselines and notes).
 - Skills: added `sf6-coach-shog` (coach .shog's rules and theories). `sf6-coach-doctaafrikan` is now kept local and gitignored.
 - Elasticity (Adaptability spectrum): only a losing plan counts as inelastic. Reusing a punished move counts when the player lost that game or was behind in the set, weighted 1.5x if the move kept getting punished. In a won game, a reused move only counts at 3,500+ damage. Keeping a winning plan scores 3/5, "Kept a winning plan".
 - Lenses: "Pressed after turn ended" is split out of "Unsafe move punished" (a new press after the attacker's blockstring ended, rather than a blocked move that was unsafe).

@@ -33,6 +33,8 @@ Upload at least these:
 - `replay-review-prediction`: predicts each set before reviewing it, then grades the prediction;
 - `sf6-drive-efficiency`: Drive and super spending;
 - `sf6-coach-shog`: coach .shog's rules and theories, used as a lens;
+- `sf6-coach-coosco`: Coosco's replay-breakdown lessons, used as a lens;
+- `sf6-character-notes`: per-character baselines, so habits are judged against what's normal for the character;
 - `sf6-coach-juzzy-tips` and `sf6-coach-juzzy-sessions`: Juzzy's coaching lessons, also used as lenses.
 
 If you have the coaching-lens skills (`skills/local/`, not in the public repo), upload those too. Without them the review still works, it just leans on fewer coaching frameworks.

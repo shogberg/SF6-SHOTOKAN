@@ -14,6 +14,8 @@ The Claude skills SHOTOKAN reviews run on. A skill is a folder with a `SKILL.md`
 | [sf6-fgc-glossary](sf6-fgc-glossary/SKILL.md) | FGC and Street Fighter vocabulary from Infil's *Fighting Game Glossary* (glossary.infil.net), paraphrased and grouped, so reviews use terms consistently. |
 | [sf6-coach-juzzy-tips](sf6-coach-juzzy-tips/SKILL.md) | Lessons from Juzzy's *Juzz the Tip* videos (YouTube @juzz87): neutral skips before footsies, pressing with intention, meter and cash-outs, plus frames, overextending, autopilot, the don't-whiff drill. Shared with permission. |
 | [sf6-coach-juzzy-sessions](sf6-coach-juzzy-sessions/SKILL.md) | Recurring themes from Juzzy's *Sit Down and Shut Up* coaching sessions and set reviews: play grounded, don't give up space, corner control, shimmy punishes and interactions to kill, block more, Drive discipline. Shared with permission. |
+| [sf6-coach-coosco](sf6-coach-coosco/SKILL.md) | Lessons from Coosco's replay breakdowns (Twitch/YouTube): walk forward before pressing, read the clues opponents leave, don't give up your turn, suffocate in the corner, responsible Drive Impact, jumps and wake-up supers. |
+| [sf6-character-notes](sf6-character-notes/SKILL.md) | Character-specific notes and baselines (how often each character jumps, Drive Rushes, parries and throws), so a player's habits are judged against what's normal for their character. |
 
 ## Personalize them
 Every copy here, and in `skills/local/`, has the author's details replaced with placeholders. Fill them in with your own before installing:
