@@ -9,7 +9,7 @@ The Claude skills SHOTOKAN reviews run on. A skill is a folder with a `SKILL.md`
 | [sf6-review-dashboard](sf6-review-dashboard/SKILL.md) | Dashboard format: datasets, page sections, the Story of the Set, local and standalone copies. |
 | [replay-review-prediction](replay-review-prediction/SKILL.md) | Predict each set before reviewing it, then grade the prediction. |
 | [sf6-drive-efficiency](sf6-drive-efficiency/SKILL.md) | Value of Drive and super spending on offense and defense. |
-| [sf6-coach-doctaafrikan](sf6-coach-doctaafrikan/SKILL.md) | Notes from two coaching sessions with DoctaAfrikan (E.X. Dojo): categorizing opponents, Venn-diagram answers, default offense that gathers info, Cammy as a "scam artist", structured training. Shared with permission. |
+| [sf6-coach-shog](sf6-coach-shog/SKILL.md) | Coach .shog's own rules and theories: 2MK hit-confirm limits, judging wake-up options, when taking a throw is correct, read vs react and reaction frames, conditioning, risk vs skill gap, Plant and Harvest and the M. Bison Scissor Kicks theory (both credited to PortaJon, Arizona FGC), the Economy of Buttons (James Chen and PortaJon). |
 | [sf6-footsies-handbook-maj](sf6-footsies-handbook-maj/SKILL.md) | Maj's *Street Fighter Footsies Handbook* (sonichurricane.com): Elements 1-35, Rules 1-5, the projectile and avoiding-footsies supplements and the epilogue, paraphrased with SF6 translations. A lens the review loads. |
 | [sf6-fgc-glossary](sf6-fgc-glossary/SKILL.md) | FGC and Street Fighter vocabulary from Infil's *Fighting Game Glossary* (glossary.infil.net), paraphrased and grouped, so reviews use terms consistently. |
 | [sf6-coach-juzzy-tips](sf6-coach-juzzy-tips/SKILL.md) | Lessons from Juzzy's *Juzz the Tip* videos (YouTube @juzz87): neutral skips before footsies, pressing with intention, meter and cash-outs, plus frames, overextending, autopilot, the don't-whiff drill. Shared with permission. |
@@ -44,6 +44,9 @@ mkdir -p skills-personal && cp -r skills/. skills-personal/ && find skills-perso
   -e 's#{{COACHING_DIR}}#D:\\SF6-Claude-Coaching#g' -e 's#{{VIDEOS_DIR}}#C:\\Users\\alex\\Videos#g' {} +
 ```
 `skills-personal/` is gitignored, so your details stay out of the repo.
+
+## Private coaching notes
+`sf6-coach-doctaafrikan` (notes from private coaching sessions) is kept local and gitignored. Without it the review still runs.
 
 ## Coaching lenses (`skills/local/`, not in the repo)
 The review method also loads coaching "lens" skills: paraphrased summaries of E.X. Dojo seminars. They stay out of the public repo for now (`skills/local/` is in `.gitignore`). The list of what each one covers is in `SKILLS.md` (also local only).
