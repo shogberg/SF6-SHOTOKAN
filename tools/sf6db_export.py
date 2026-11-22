@@ -7,7 +7,7 @@ Tabs: set_metrics, player_reads, opponents, char_matchups (only sets where the f
 import json, os, sqlite3, sys, collections as C
 
 LEAKS = [('Counter-hit at mid range', 'Counter-hit at mid range'), ('Whiff punished', 'Whiff punished'), ('Walked in', 'Walked in'), ('Jumped', 'Jumped'),
-         ('Challenging pressure', 'Challenging pressure'), ('Challenging okizeme', 'Challenging okizeme'), ('Unsafe move punished', 'Unsafe move punished'),
+         ('Challenging pressure', 'Challenging pressure'), ('Challenging okizeme', 'Challenging okizeme'), ('Unsafe move punished', 'Unsafe move punished'), ('Pressed after turn ended', 'Pressed after turn ended'),
          ('Blocking, opened up', 'Opened up while blocking'), ('Jumped in on (no anti-air)', "Jump-ins not anti-aired")]
 
 

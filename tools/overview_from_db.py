@@ -13,7 +13,7 @@ mv = lambda n: JUMPS.get(n) or _mv(n)
 
 ME = '.shog'
 LEAK = {'Counter-hit at mid range': 'Counter-hit at mid range', 'Whiff punished': 'Whiff punished', 'Walked in': 'Walking in', 'Jumped': 'Jumps / dive kicks',
-        'Challenging pressure': 'Challenging pressure', 'Challenging okizeme': 'Challenging okizeme', 'Unsafe move punished': 'Unsafe moves',
+        'Challenging pressure': 'Challenging pressure', 'Challenging okizeme': 'Challenging okizeme', 'Unsafe move punished': 'Unsafe moves', 'Pressed after turn ended': 'Pressing after turn ended',
         'Blocking, opened up': 'Opened up', 'Jumped in on (no anti-air)': 'Jump-ins not anti-aired', 'Unclear / super': 'Supers',
         'Own offense beaten by a reversal': 'Reversals', 'Drive Rush / Impact checked': 'Drive Rush / Impact'}
 NORMALS = ('LP', 'MP', 'HP', 'LK', 'MK', 'HK')

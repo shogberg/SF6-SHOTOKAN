@@ -351,6 +351,21 @@ def analyze(path, game_no, focus):
         v_recent_getup = 'GETUP' in vst_prev[-40:]
         v_recent_block = any(b > 0 for b in vhist_prev)
         a_recent_block = any(b > 0 for b in ahist_prev)
+        # was the move that got hit the one that was blocked (unsafe), or a new press after the attacker was free again?
+        new_press_after_block = False
+        if a_recent_block:
+            A_, V_ = lookback(h['frame'], a, 35), lookback(h['frame'], v, 35)
+            last_bs = max(j for j, x in enumerate(A_) if (x.get('blockstun') or 0) > 0)
+            v_now = next((x for x in reversed(V_) if x.get('act_st_name') != 'DAMAGE'), None)
+            if v_now is not None and last_bs < len(V_):
+                k_now = len(V_) - 1 - next(j for j, x in enumerate(reversed(V_)) if x is v_now)
+                # a new action started after the attacker left blockstun
+                # (a special or super changing action id mid-move, e.g. its landing phase, is the same move)
+                def _new(j):
+                    cur, prv = V_[j].get('act_st_name'), V_[j - 1].get('act_st_name')
+                    if cur not in ATTACK_STATES or V_[j].get('action_id') == V_[j - 1].get('action_id'): return False
+                    return prv not in ATTACK_STATES or prv != cur or cur == 'ATCK'
+                new_press_after_block = any(_new(j) for j in range(last_bs + 1, k_now + 1))
         if reversal: situation = 'defense'
         elif v_recent_getup: situation = 'oki'
         elif v_recent_block: situation = 'pressure'
@@ -367,7 +382,8 @@ def analyze(path, game_no, focus):
         elif vst in ATTACK_STATES or vst == 'PARRY':
             vmove = mname(names, v, (f.get(v) or {}).get('action_id'))
             if vmove.startswith('ATK_CTA'): lens = 'Drive Rush / Impact checked'
-            elif a_recent_block: lens = 'Unsafe move punished'            # their move was blocked, then punished
+            elif a_recent_block and new_press_after_block: lens = 'Pressed after turn ended'   # their move was blocked, then they pressed again once the attacker was free
+            elif a_recent_block: lens = 'Unsafe move punished'            # their move was blocked, then punished in its recovery
             elif v_recent_getup: lens = 'Challenging okizeme'             # pressed on wake-up into the oki
             elif v_recent_block: lens = 'Challenging pressure'            # pressed in their blockstring / pressure
             elif kind == 'punish counter': lens = 'Whiff punished'        # caught in the recovery of a whiffed move

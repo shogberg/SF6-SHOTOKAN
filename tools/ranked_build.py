@@ -62,6 +62,8 @@ LENS_FIX = {
         'Ask what each jump is meant to land on; dive kick only as a whiff punish, high enough to land plus (How to Jump, DPs and Divekicks).'),
     'Unsafe move punished': ('Offense', 'Unsafe moves punished',
         'Check the on-block advantage of what got punished (Spiral Arrow, Cannon Spike, dive kick landings) and end strings on something safe (Simple Gameplan).'),
+    'Pressed after turn ended': ('Offense', 'Pressing again after your blocked string, once their turn had started',
+        'After a blocked string, your turn is over once they recover: block, step back, or use a frame trap that closes the gap instead of a new button (Stagger Pressure, Jab Strings).'),
     'Blocking, opened up': ('Defense', 'Opened up while blocking (throws, overheads, mixups)',
         'Midscreen, taking the throw is fine; in the corner back-jump or back-dash instead of teching (Defense Equation, Delay Option Selects).'),
     'Own offense beaten by a reversal': ('Offense', 'Pressure beaten by reversals',

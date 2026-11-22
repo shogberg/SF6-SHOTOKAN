@@ -51,7 +51,7 @@ LENS_SHORT = {'Challenging pressure': 'challenging pressure', 'Challenging okize
               'Pressed in their pressure / on wake-up': 'pressing in pressure or on wake-up', 'Pressed at mid range': 'pressing at mid range',
               'Walked in': 'walking in', 'Teched a throw': 'teching throws', 'Blocking, opened up': 'getting opened up while blocking',
               'Jumped': 'jumping', 'Jumped in on (no anti-air)': 'being jumped in on', 'Own offense beaten by a reversal': 'their offense beaten by a reversal',
-              'Drive Rush / Impact checked': 'Drive Rush / Impact getting checked', 'Unsafe move punished': 'unsafe moves punished', 'Unclear / super': 'supers or unclear'}
+              'Drive Rush / Impact checked': 'Drive Rush / Impact getting checked', 'Unsafe move punished': 'unsafe moves punished', 'Pressed after turn ended': 'pressing again after their turn started', 'Unclear / super': 'supers or unclear'}
 
 MOVE_NAMES = {'SOMERSAULT_Start': 'Flash Kick', 'SONICBOOM': 'Sonic Boom', 'Akidako_Ganzigarame': 'Snake Step grab (Akidako_Ganzigarame)'}
 SKIP_PATTERNS = ('first action after blocking',)
