@@ -4,7 +4,8 @@ One file (D:\\SF6-Claude-Coaching\\history\\sf6.db) holding every reviewed set: 
 sets, games, the analyzer's hits / events / timings, per-set stats, player reads, habits and matchup notes.
 
   python sf6db.py init  DB
-  python sf6db.py ingest DB ANALYZER_OUTDIR META.json      # one set; META describes it (see ingest_set)
+  python sf6db.py ingest DB ANALYZER_OUTDIR META.json      # one set; META describes it (see ingest_set); also
+                                                          # computes its spectra (spectra_backfill.py), --no-spectra to skip
   python sf6db.py sql   DB "SELECT ..."                   # ad-hoc query, prints rows
 
 Re-ingesting a set replaces it (same set_key), so a set can be re-analysed without duplicates.
@@ -304,7 +305,13 @@ if __name__ == '__main__':
     cmd, db = sys.argv[1], sys.argv[2]
     con = connect(db)
     if cmd == 'ingest':
-        print('ingested', ingest_set(con, sys.argv[3], json.load(open(sys.argv[4]))))
+        meta = json.load(open(sys.argv[4]))
+        key = ingest_set(con, sys.argv[3], meta)
+        print('ingested', key)
+        con.commit(); con.close()
+        if '--no-spectra' not in sys.argv:   # the eight player spectra (spectra table + review_docs archetypes)
+            import spectra_backfill
+            spectra_backfill.backfill(db, [key], local=meta.get('captures_local'))
     elif cmd == 'sql':
         cur = con.execute(sys.argv[3]); print(' | '.join(d[0] for d in cur.description))
         for r in cur.fetchall(): print(' | '.join('' if v is None else str(v) for v in r))
