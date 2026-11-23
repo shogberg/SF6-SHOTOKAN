@@ -107,7 +107,7 @@ You can start small and go deeper later: "do a Full review of set 3" turns an ex
   - fixes with drills, and a training routine.
 - **A short summary in the chat:** the result, the biggest highs and lows, and the top fixes.
 - **Local copies** in your coaching folder (an offline HTML version and the data files), if Claude has access to it.
-- **History:** every reviewed set goes into a local database (`history\sf6.db`), including sets you review for other players, so later reviews can compare you, and your opponents, with past sets. After a review, the capture files are stored gzipped (`<ReplayID>.json.gz`, about 40x smaller).
+- **History:** every reviewed set goes into a local database (`history\sf6.db`), including sets you review for other players, so later reviews can compare you, and your opponents, with past sets. Each set's player spectra are computed when it's added. After a review, the capture files are stored gzipped (`<ReplayID>.json.gz`, about 40x smaller).
 
 ## 7. Keep going
 Just keep chatting. For example:
@@ -115,6 +115,7 @@ Just keep chatting. For example:
 - "Show me every time I got anti-aired."
 - "Add the next set to the same dashboard."
 - "Compare tonight with my sets from last week."
+- "Compare my decision presses and button economy with another player's."
 - "Make the fixes into a 30-minute training plan."
 
 If something looks wrong ("that wasn't a counter hit"), say so. Claude checks the data or the video and corrects it.

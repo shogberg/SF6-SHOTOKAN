@@ -25,7 +25,9 @@ Replay reviews for Street Fighter 6. Claude reads each game's REFramework captur
   - burnouts and perfect parries;
   - Drive Parries;
   - Drive and super spending per round;
-  - per-game stats and action timings.
+  - per-game stats and action timings;
+  - every decision press (a new button, special, super or throw while the opponent isn't being hit or knocked down): its situation, the move, what the opponent was doing and the first outcome (landed, blocked, parried, whiffed, got hit).
+- **Damage** is the permanent life a hit takes. When a hit lands while the victim has white (recoverable) health, the white health it cashes in counts too (e.g. after Arjun's blocked pressure or a Drive Reversal). Hit rows also record `recoverable` (white health the combo added) and `white_cashed`.
 - **Hit kinds**:
   - **Clean hit** is the default.
   - **Counter hit**: the first hit does 1.2× its base damage.
@@ -45,8 +47,11 @@ Replay reviews for Street Fighter 6. Claude reads each game's REFramework captur
 - `history\sf6.db` (SQLite) keeps every reviewed set, game, hit, event, resource row, parry and review doc.
 - It's used to:
   - compare a player with their own history (e.g. "shog tonight vs his history");
+  - compare players with each other (`tools/decision_presses.py`: where they press, with which buttons, and what it leads to);
   - make predictions before a set;
   - score player spectra against everyone reviewed so far.
+- `sf6db.py ingest` also computes the set's eight spectra and adds its replays to the behaviour cache first (`--no-spectra` skips it). `tools/spectra_backfill.py` fills sets that have none.
+- When the analyzer's counting changes, `tools/rescore_damage.py` re-scores damage in an existing database from the captures without re-ingesting, and `lethal_backfill.py` / `game_stats_backfill.py` apply older rule changes.
 
 ### Review levels
 | Level | What you get |
@@ -123,6 +128,7 @@ Replay reviews for Street Fighter 6. Claude reads each game's REFramework captur
 7. **Punishes**: what was punished, with what, and the missed punishes ("none (missed)").
 8. **Adaptation**: what changed between rounds and games, with each change tagged New, Improved or Regressed and where it first appeared.
 9. **Turning points**: the exchange that decided each game.
+10. **Economy of buttons**: each player's share of the decision presses, who starts the exchanges, damage per decision press against the opponent's, and who won the Drive war (pressure cancels, Drive lost blocking, burnouts).
 
 **How it's reported:**
 - Every claim cites game, round and timer.
@@ -192,6 +198,8 @@ When a player has history in the database, the dashboard compares this set with 
 |---|---|
 | `tools/analyze_capture.py` | Turns REFramework capture files into review datasets (hits, events, parries, resources, timings). |
 | `tools/sf6db.py`, `rank.py`, `spectra.py`, `behavior.py`, `beh_cache.py` | The history database (SQLite) and the player spectra and behaviour stats. |
+| `tools/spectra_backfill.py`, `rescore_damage.py`, `lethal_backfill.py`, `game_stats_backfill.py` | Bring an existing database up to date after a rule change: spectra, damage (white health), lethal burnouts, per-game stats. |
+| `tools/decision_presses.py` | Compare players' decision presses: per round by situation, outcome rates, top moves per situation. |
 | `tools/quick_dashboard_from_db.py`, `overview_from_db.py`, `profiles_from_db.py`, `sf6db_export.py`, `ranked_build.py` | Build dashboard datasets, overviews and player profiles from the database. |
 | `tools/standalone.py`, `standalone_head.html`, `standalone_shim.js`, `summary_md.py`, `check_page.py` | Offline HTML copies of dashboards, summaries and page checks. |
 | `tools/drive_contact.py`, `drive_measure.py` | Drive gauge measurement helpers. |
