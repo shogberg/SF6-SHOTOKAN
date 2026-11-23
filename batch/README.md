@@ -67,3 +67,15 @@ Timing details that matter:
    result, info and end-of-replay screens; `settle_frames` / `settle_screen` set how long a screen must stay
    on top before keys are pressed.
 3. When a search fails, the log shows the game's dialog text after `dialog=`.
+
+## Pull replay IDs from Buckler
+`buckler_replays.py` gets a player's newest replay IDs (up to 100, Buckler's limit) from their Buckler Battle Log, in the same format `batch_record.py --file` reads. It uses the same method as [sfbuff](https://github.com/alanoliveira/sfbuff): the Buckler site's Next.js data files, with your own logged-in session.
+1. Sign in at streetfighter.com/6/buckler in your browser, open DevTools > Network, click any Buckler request and copy its `cookie` request header.
+2. Paste it after `BUCKLER_COOKIE=` in `.env` (see `.env.example`). Cookies expire; a 403 means paste a fresh one.
+3. Run it, then record:
+
+       python buckler_replays.py <CFN ID>                     100 newest -> ids_<CFN ID>.txt
+       python buckler_replays.py <CFN ID> -n 30 --type ranked 30 newest ranked only
+       python buckler_replays.py <CFN ID> --json replays.json also save players, characters, MR/LP and round results
+       python batch_record.py --file ids_<CFN ID>.txt
+It waits between pages and stops at a rate limit (405), maintenance (503) or an expired cookie (403) with a message saying which.

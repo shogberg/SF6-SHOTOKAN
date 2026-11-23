@@ -3,6 +3,9 @@
 Notable changes to the SHOTOKAN review tooling and skills, newest first. Every push adds its changes here.
 
 ## 2026-11-22
+- Moved to the shotokan-sf6 organization (was shogberg/SF6-SHOTOKAN): links to shotokan-sf6/mods and shotokan-sf6/web.
+- batch/buckler_replays.py: pull a player's last 100 replay IDs from Buckler by CFN ID, for batch_record.py --file (BUCKLER_COOKIE in .env).
+- GETTING-STARTED.md: Buckler pulls, predictions on every review, lethal burnouts, every reviewed set in the database, gzipped captures, the dashboard tabs and the new web pages.
 - sf6-meta-description.md: data findings from 69 compared sets (winner vs loser): Resource use revised to 4, Initiative to 3, throws, counter hits and punish counters, wake-up blocking, Drive Reversal, burnouts and anti-airs as weaker signals, archetype win rates, and the measures still to fix.
 - TODO.md: planned work (button sequencing, offensive structure, matchup-specific punishes, missed whiff punishes, long-term tracking and prediction, pro replays).
 - Burnouts: a burnout that starts inside the player's own combo that kills (the opponent stays in hitstun until their HP hits 0) is logged as a `lethal burnout` and no longer counts as a burnout in counts, tiles, spectra or advice. `tools/lethal_backfill.py` relabels burnouts already in a history database.

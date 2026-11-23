@@ -199,6 +199,6 @@ When a player has history in the database, the dashboard compares this set with 
 | `batch/` | `batch_record.py` drives OBS to record replays by ID (see `batch/README.md`). |
 | `skills/` | The Claude skills the reviews run on (see `skills/README.md`). Coaching-lens skills live in the gitignored `skills/local/`. |
 
-The in-game scripts (`capture_replay.lua`, `export_moves.lua`, `batch_replays.lua`) live in the separate REFramework mods repo, [SF6-SHOTOKAN-mods](https://github.com/shogberg/SF6-SHOTOKAN-mods). That repo also ships move names for the full roster in `data/sf6_moves/`; point the analyzer at them with `SF6_MOVES=<path to data/sf6_moves>` so hits and habits use move names instead of action IDs.
+The in-game scripts (`capture_replay.lua`, `export_moves.lua`, `batch_replays.lua`) live in the separate REFramework mods repo, [shotokan-sf6/mods](https://github.com/shotokan-sf6/mods). That repo also ships move names for the full roster in `data/sf6_moves/`; point the analyzer at them with `SF6_MOVES=<path to data/sf6_moves>` so hits and habits use move names instead of action IDs.
 
 Not in this repo, on purpose: the history database, capture files, replays and videos, and the review dashboards. They hold match data about real players. Some scripts still have the author's local paths (`D:\SF6-Claude-Coaching`, working folders) as defaults; change them for your setup.

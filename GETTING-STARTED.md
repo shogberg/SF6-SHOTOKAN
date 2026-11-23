@@ -13,12 +13,12 @@ This guide is for someone who has never used Claude. By the end you'll have reco
 | A **Claude account** ([claude.ai](https://claude.ai)) | Where the reviews happen. A paid plan gives you more room for long reviews, but you can start on Free. |
 | The **Claude desktop app** (recommended) | It can be given access to a folder on your PC, so Claude can read your capture files and videos directly instead of you uploading them. Capture files are large (10-40 MB each). |
 | **Street Fighter 6** on PC (Steam) + **[REFramework](https://github.com/praydog/REFramework)** | REFramework runs the capture script inside the game. |
-| The **SHOTOKAN capture scripts** from [SF6-SHOTOKAN-mods](https://github.com/shogberg/SF6-SHOTOKAN-mods) | They record every frame of a replay to a file Claude can read exactly. |
+| The **SHOTOKAN capture scripts** from [shotokan-sf6/mods](https://github.com/shotokan-sf6/mods) | They record every frame of a replay to a file Claude can read exactly. |
 | **OBS** (optional) | A video of the replay lets Claude check key moments by eye. Reviews work from capture files alone. |
 
 ## 2. Set up the capture scripts (once)
 1. Install REFramework for SF6 (follow its instructions; it adds a `reframework` folder next to the game).
-2. From SF6-SHOTOKAN-mods, copy `autorun\*.lua` into `Street Fighter 6\reframework\autorun\`, and the `data\sf6_moves` folder into `Street Fighter 6\reframework\data\`.
+2. From the mods repo, copy `autorun\*.lua` into `Street Fighter 6\reframework\autorun\`, and the `data\sf6_moves` folder into `Street Fighter 6\reframework\data\`.
 3. Start the game. Press **Insert** to open the REFramework menu: you should see a **Replay Capture** window.
 
 ## 3. Add the skills to Claude (once)
@@ -48,7 +48,7 @@ Skills you upload stay private to your account.
 
 For a **set** (all the games against one opponent), record every game in it. Local matches work too: leave the capture script running while you play, and it saves each match when it ends.
 
-To record many replays without clicking through menus, see the batch recorder in [batch/README.md](batch/README.md).
+To record many replays without clicking through menus, see the batch recorder in [batch/README.md](batch/README.md). It can also pull a player's last 100 replay IDs from Buckler by CFN ID (`batch/buckler_replays.py`, using your own Buckler login), so you don't have to copy IDs by hand.
 
 ## 5. Ask for a review
 Open a new chat. If you're in the desktop app, give Claude access to your coaching folder when it asks (or attach the files to the message). Then just ask, in your own words. Some examples:
@@ -63,7 +63,7 @@ Things that help Claude get it right:
 - **Which games make up a set**, and the format (FT2 = first to 2 games, FT3 = first to 3).
 - **Which player is you.** For local matches with no CFN names, give each player a name and character.
 - **The review level you want:** Quick, Full or Tournament (see "Choosing a review level" below). If you don't say, Claude asks or picks Full.
-- Ask for a **prediction** first if you want to test how well Claude reads the matchup before it looks at the games.
+- Claude writes a **prediction** before every review (winner, score and each player's gameplan, from your history and the matchup), then grades it afterwards. You don't need to ask.
 
 A review takes a while: Claude reads every frame, runs the analysis, and builds the dashboard. You can leave the chat open and come back.
 
@@ -92,14 +92,14 @@ The three levels use the same game data. They differ in how much Claude writes a
 - **Full:** a set you want to learn from: a loss you don't understand, a new matchup, a rival.
 - **Tournament:** an important set (a tournament, a long FT3/FT5 against one player), or when you want to coach both sides. It works best with video of every game.
 
-A **prediction** can go with any level: ask "predict it first" and Claude writes its call before looking at the games, then grades itself in the review.
+A **prediction** goes with every level: Claude writes its call before looking at the games, then grades itself in the review.
 
 You can start small and go deeper later: "do a Full review of set 3" turns an existing Quick review into a Full one.
 
 ## 6. What you get back
-- **A dashboard** (an interactive page in the chat):
+- **A dashboard** (an interactive page in the chat) with Overview, Set review, Coach lenses and About SHOTOKAN tabs:
   - where your damage came from;
-  - counter hits, anti-airs, burnouts and punishes;
+  - counter hits, anti-airs, burnouts and punishes (a burnout spent on a combo that kills, e.g. everything into a Level 3 for the round, doesn't count);
   - Drive and super spending;
   - player reads on eight spectra (e.g. Impulsive vs Mindful, Inelastic vs Elastic);
   - habits for both players;
@@ -107,7 +107,7 @@ You can start small and go deeper later: "do a Full review of set 3" turns an ex
   - fixes with drills, and a training routine.
 - **A short summary in the chat:** the result, the biggest highs and lows, and the top fixes.
 - **Local copies** in your coaching folder (an offline HTML version and the data files), if Claude has access to it.
-- **History:** each reviewed set goes into a local database, so later reviews can compare you, and your opponents, with past sets.
+- **History:** every reviewed set goes into a local database (`history\sf6.db`), including sets you review for other players, so later reviews can compare you, and your opponents, with past sets. After a review, the capture files are stored gzipped (`<ReplayID>.json.gz`, about 40x smaller).
 
 ## 7. Keep going
 Just keep chatting. For example:
@@ -129,4 +129,4 @@ If something looks wrong ("that wasn't a counter hit"), say so. Claude checks th
 | Confidence says "Low" | A 2-0 set gives little to go on. Reads firm up as more sets are reviewed. |
 
 ## See your history on the web (optional)
-[SF6-SHOTOKAN-WEB](https://github.com/shogberg/SF6-SHOTOKAN-WEB) turns your review history into a searchable site: player profiles, set lists, set details and head to head. It runs locally with one Docker command.
+[shotokan-sf6/web](https://github.com/shotokan-sf6/web) turns your review history into a searchable site: a Players page with each player's overview, set lists and set details, head to head, **What winning players do** (the winner and loser of each set compared stat by stat), Observations (dated notes on what wins and what the model learned) and an About page. It runs locally with one Docker command, or on your own server; publishing a new snapshot after each batch of reviews keeps it current.
