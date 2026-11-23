@@ -790,6 +790,7 @@ def analyze(path, game_no, focus):
                 if r2:
                     out_ = ('got ' + r2['hit_kind']) if done is None else ('whiff punished' if r2['hit_kind'] in ('counter hit', 'punish counter') else 'got hit after')
                     dmg = -r2['damage']; break
+                if fr[j][o].get('act_st_name') == 'HOLD': out_ = 'throw'; break   # being thrown (long throws deal damage after the window)
                 if (fr[j][o].get('blockstun') or 0) > 0 and fr[j][o].get('act_st_name') != 'DAMAGE': out_ = 'blocked'; break
                 if fr[j][o].get('act_st_name') == 'PARRY' and j > k: out_ = 'parried'; break
                 if done is None and fr[j][side].get('act_st_name') not in MOVE_ST: done = j
