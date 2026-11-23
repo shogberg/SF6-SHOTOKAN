@@ -3,6 +3,7 @@
 Notable changes to the SHOTOKAN review tooling and skills, newest first. Every push adds its changes here.
 
 ## 2026-11-22
+- TODO.md: planned work (button sequencing, offensive structure, matchup-specific punishes, missed whiff punishes, long-term tracking and prediction, pro replays).
 - Burnouts: a burnout that starts inside the player's own combo that kills (the opponent stays in hitstun until their HP hits 0) is logged as a `lethal burnout` and no longer counts as a burnout in counts, tiles, spectra or advice. `tools/lethal_backfill.py` relabels burnouts already in a history database.
 
 ## 2026-11-21
