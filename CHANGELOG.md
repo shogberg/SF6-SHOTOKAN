@@ -2,6 +2,13 @@
 
 Notable changes to the SHOTOKAN review tooling and skills, newest first. Every push adds its changes here.
 
+## 2026-11-23
+- Damage now counts white (recoverable) health. A hit's damage is permanent life lost: the drop in `hp_recoverable_cap` over the combo, including any white health the hit cashed in; a hit that only adds white health (Arjun's Indomitable Defense counter, Drive Reversal) counts 0. New hit fields `recoverable` (white health the combo added) and `white_cashed` (white health it wiped out), also stored in sf6db.py's `hits` table. On a C.Viper set, lost rounds that didn't add up to a full life bar went from 10 of 23 to 2; the old count ran about 5% low.
+- Damage is read from the frame before the first hit (some moves leave the victim in a damage state with no hitstun, so the old lookback read HP after the hit), runs on while the victim is still being hit or held (cinematic supers log their last hits late), and never reaches back into the previous combo on the same victim (no more double counting).
+- Command grabs whose hits land long after the Throw stat (Arjun's Ghastly Interrogation, about 145 frames) are no longer counted twice, and are tagged as throws.
+- Arjun's moves are named: Arm of Justice (+ follow-up), Breathing Ring / Breathing Shockwave, Indomitable Defense (stance, counter) and Moral Breakdown, Divine Pillar, Cruel Shoulder and Justice Beyond, Ghastly Interrogation, SA1 Howling Destruction, SA2 Instant Oblivion, SA3 Yaksha's Order. Divine Pillar (`03`) and Cruel Shoulder (`623P`) are inferred from how the moves behave. Hits from a pillar or ring set up earlier are credited to that move instead of Arjun's walk or jump.
+- `tools/rescore_damage.py`: re-scores damage in an existing history database from the captures, without re-ingesting (reads, habits, review docs and press counts are kept), and recomputes the damage-based set_stats and game_stats.
+
 ## 2026-11-22
 - sf6db.py: new `game_stats` table, the same metrics as `set_stats` per game with the character played, written on every ingest. `tools/game_stats_backfill.py` fills it for sets ingested earlier (from the stored hits, events and timings; press counts need a re-ingest).
 - Moved to the shotokan-sf6 organization (was shogberg/SF6-SHOTOKAN): links to shotokan-sf6/mods and shotokan-sf6/web.

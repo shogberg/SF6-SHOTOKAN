@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS hits (
   hit_id INTEGER PRIMARY KEY, set_key TEXT REFERENCES sets ON DELETE CASCADE, replay_id TEXT, round INTEGER, round_timer INTEGER,
   attacker_id INTEGER, victim_id INTEGER, attacker_char TEXT, victim_char TEXT, damage INTEGER, starter TEXT, hits_in_combo INTEGER,
   hit_kind TEXT, anti_air INTEGER, situation TEXT, lens TEXT, victim_state TEXT, victim_move TEXT, note TEXT,
-  drive_spent REAL, super_spent REAL, drive_gained REAL, drive_damage REAL, knockdown TEXT, kd_adv INTEGER, corner_dist REAL, victim_drive_after REAL);
+  drive_spent REAL, super_spent REAL, drive_gained REAL, drive_damage REAL, knockdown TEXT, kd_adv INTEGER, corner_dist REAL, victim_drive_after REAL, recoverable INTEGER, white_cashed INTEGER);
 CREATE TABLE IF NOT EXISTS events (
   event_id INTEGER PRIMARY KEY, set_key TEXT REFERENCES sets ON DELETE CASCADE, replay_id TEXT, round INTEGER, round_timer INTEGER,
   player_id INTEGER, type TEXT, note TEXT);
@@ -102,7 +102,7 @@ def connect(db):
     con = sqlite3.connect(db)
     con.execute('PRAGMA foreign_keys = ON')
     con.executescript(SCHEMA)
-    for t, cols in (('games', 'p1_lp INTEGER, p2_lp INTEGER, p1_rank TEXT, p2_rank TEXT'), ('hits', 'drive_spent REAL, super_spent REAL, drive_gained REAL, drive_damage REAL, knockdown TEXT, kd_adv INTEGER, corner_dist REAL, victim_drive_after REAL'),
+    for t, cols in (('games', 'p1_lp INTEGER, p2_lp INTEGER, p1_rank TEXT, p2_rank TEXT'), ('hits', 'drive_spent REAL, super_spent REAL, drive_gained REAL, drive_damage REAL, knockdown TEXT, kd_adv INTEGER, corner_dist REAL, victim_drive_after REAL, recoverable INTEGER, white_cashed INTEGER'),
                     ('resources', 'gain_hit REAL, gain_block REAL, parry_regain REAL, loss_block REAL, loss_hit REAL, loss_hit_drive_impact REAL, loss_hit_punish_counter REAL, drive_rush_cancel REAL')):
         have = {r[1] for r in con.execute(f'PRAGMA table_info({t})')}
         for c_ in cols.split(', '):
@@ -233,11 +233,11 @@ def ingest_set(con, outdir, meta):
     for g in games:
         i = infos[g['game_id']]
         for s in ('p1', 'p2'): charof[(g['game_id'], i[s + '_name'])] = i[s + '_char']
-    cur.executemany('INSERT INTO hits (set_key, replay_id, round, round_timer, attacker_id, victim_id, attacker_char, victim_char, damage, starter, hits_in_combo, hit_kind, anti_air, situation, lens, victim_state, victim_move, note, drive_spent, super_spent, drive_gained, drive_damage, knockdown, kd_adv, corner_dist, victim_drive_after) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+    cur.executemany('INSERT INTO hits (set_key, replay_id, round, round_timer, attacker_id, victim_id, attacker_char, victim_char, damage, starter, hits_in_combo, hit_kind, anti_air, situation, lens, victim_state, victim_move, note, drive_spent, super_spent, drive_gained, drive_damage, knockdown, kd_adv, corner_dist, victim_drive_after, recoverable, white_cashed) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
                     [(k, h['game_id'], h['round'], h['round_timer'], names[h['attacker']], names[h['victim']], charof.get((h['game_id'], h['attacker'])),
                       charof.get((h['game_id'], h['victim'])), h['damage'], h['starter'], h.get('hits_in_combo'), h['hit_kind'], int(bool(h.get('anti_air'))),
                       h.get('situation'), h.get('lens'), h.get('victim_state'), h.get('victim_move'), h.get('note'),
-                      h.get('drive_spent'), h.get('super_spent'), h.get('drive_gained'), h.get('drive_damage'), h.get('knockdown'), h.get('kd_adv'), h.get('corner_dist'), h.get('victim_drive_after')) for h in hits])
+                      h.get('drive_spent'), h.get('super_spent'), h.get('drive_gained'), h.get('drive_damage'), h.get('knockdown'), h.get('kd_adv'), h.get('corner_dist'), h.get('victim_drive_after'), h.get('recoverable'), h.get('white_cashed')) for h in hits])
     cur.executemany('INSERT INTO events (set_key, replay_id, round, round_timer, player_id, type, note) VALUES (?,?,?,?,?,?,?)',
                     [(k, e['game_id'], e['round'], e.get('round_timer'), names[e['player']], e['type'], e.get('note')) for e in events])
     cur.executemany('INSERT INTO timings (set_key, replay_id, round, round_timer, player_id, event, action, frames_until) VALUES (?,?,?,?,?,?,?,?)',

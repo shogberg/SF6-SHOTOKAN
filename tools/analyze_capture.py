@@ -85,11 +85,23 @@ CHAR_SPECIALS.update({
               ('ATK_SPA_SP1_L', 'Rising Tackle (L)'), ('ATK_SPA_SP1_M_H_EX', 'Rising Tackle'), ('ATK_SPA_SP1_END', 'Rising Tackle'),
               ('ATK_SPA_SP2_M', 'Crack Shoot')],
 })
+CHAR_SPECIALS.update({
+    # Arjun (Oct 2026): numpad names. 236P / 22K / 236K / Throw_Grab / supers are solid; 03 = Divine Pillar and 623P = Cruel Shoulder
+    # (SP_Attack = Justice Beyond, the pillar strike) are inferred from move behaviour, not confirmed
+    'Arjun': [('236P_6P', 'Arm of Justice follow-up'), ('236P', 'Arm of Justice'), ('236K_LP', 'Breathing Shockwave (forward)'),
+              ('236K_MP', 'Breathing Shockwave (diagonal)'), ('236K_HP', 'Breathing Shockwave (up)'), ('236K', 'Breathing Ring'),
+              ('22K_Parry', 'Indomitable Defense counter'), ('22K_Attack', 'Moral Breakdown'), ('22K', 'Indomitable Defense (stance)'),
+              ('623P_SP_Attack', 'Justice Beyond (pillar strike)'), ('623P_GUARD', 'Cruel Shoulder'), ('623P', 'Cruel Shoulder'),
+              ('03', 'Divine Pillar'), ('Throw_Grab_OD', 'Ghastly Interrogation (OD)'), ('Throw_Grab', 'Ghastly Interrogation'),
+              ('Throw_START', 'Ghastly Interrogation')],
+})
+LINGER = {'Arjun': ('SPA_03', 'SPA_236K')}   # moves whose hitbox stays out after the character moves on
 CHAR_SUPERS = {
     'Ryu': [('SAA_HADOUKEN', 'SA1 Shinku Hadoken'), ('SAA_HADOSHO', 'SA2 Shin Hashogeki'), ('SAD_SHINSYORYU', 'Critical Art (Shin Shoryuken)'),
             ('SAA_SHINSYORYU', 'SA3 Shin Shoryuken'), ('CAA', 'Critical Art (Shin Shoryuken)')],
     'Terry': [('SAA_BusterWolf', 'SA1 Buster Wolf'), ('SAA_2', 'SA2'), ('SA3', 'SA3'), ('CA', 'Critical Art')],
     'Juri': [('SAA_SAKKAIFUHAJIN', 'SA1 Sakkai Fuhazan'), ('SAA_FUSUI_ENGINE', 'SA2 Feng Shui Engine'), ('SAA_03', 'SA3'), ('SAD_03', 'SA3'), ('CAA_03', 'Critical Art'), ('CAD_03', 'Critical Art')],
+    'Arjun': [('SAA_SA1', 'SA1 Howling Destruction'), ('SAA_SA2', 'SA2 Instant Oblivion'), ('SAD_SA2', 'SA2 Instant Oblivion'), ('SA3', "SA3 Yaksha's Order"), ('CAA', "Critical Art (Yaksha's Order)")],
     'Blanka': [('SAA_1_SHOUT', 'SA1'), ('SAA_2_ROLLING_CANON', 'SA2'), ('SAA_3_CANON_BALL', 'SA3'), ('SAD_3_CANON_BALL', 'SA3'), ('CAA_CANON_BALL', 'Critical Art'), ('CAD_CANON_BALL', 'Critical Art')],
 }
 
@@ -257,15 +269,34 @@ def analyze(path, game_no, focus):
         else:
             combos[-1]['hits'].append(h)
     # damage = victim HP drop over the combo (combo damage counter as fallback)
-    for c in combos:
-        f0 = frame(c['first']['frame']); v = c['victim']
-        hp_before = None
-        k = fidx.get(c['first']['frame'], 0)
-        for j in range(k, max(0, k - 30), -1):
-            hp_before = fr[j][v]['hp']
-            if fr[j][v]['hitstun'] in (0, None): break
-        hp_after = min(h['victim_hp'] for h in c['hits'] if h['victim_hp'] is not None)
-        c['damage'] = max(0, (hp_before or hp_after) - hp_after) or max(h['attacker_combo_damage'] or 0 for h in c['hits'])
+    # Life has two parts: hp (what is left now) and hp_recoverable_cap (the top of the white / recoverable part). Recoverable damage
+    # (Arjun's blocked pressure and stance counter, Drive Reversal, chip on some moves) drops hp but not the cap, and regenerates;
+    # the next clean hit takes the cap down to hp, so that white health is lost for good. damage = permanent life lost
+    # (cap drop over the combo, which includes the white health it cashed); recoverable = white health the combo added;
+    # white_cashed = white health that was there before the combo and was lost to it.
+    def life_change(v, k0, k1, floor=0, ceil=10 ** 9):
+        """(damage, recoverable, white_cashed, hp_drop) for victim v between frame index k0 (first hit) and k1 (last hit).
+        floor: never look back before this frame index (the previous combo on the same victim), so two combos don't share damage."""
+        j = k0 - 1   # last frame before the combo: walk back past any hitstun / damage state (late-detected first hits)
+        while j > max(0, k0 - 30, floor) and ((fr[j][v].get('hitstun') or 0) > 0 or fr[j][v].get('act_st_name') == 'DAMAGE'): j -= 1
+        j = max(0, j, floor)
+        hp0 = fr[j][v]['hp']; cap0 = fr[j][v].get('hp_recoverable_cap') or hp0
+        e = k1   # run on while the victim is still being hit or held (cinematic supers log their last hits late), up to ceil
+        while e + 1 < min(len(fr), k1 + 240, ceil) and (fr[e + 1][v].get('act_st_name') in ('DAMAGE', 'HOLD') or (fr[e + 1][v].get('hitstun') or 0) > 0): e += 1
+        span = range(k0, min(len(fr), e + 3, ceil))
+        hp1 = min(fr[x][v]['hp'] for x in span); cap1 = min((fr[x][v].get('hp_recoverable_cap') or fr[x][v]['hp']) for x in span)
+        cap1 = max(cap1, hp1)
+        white0, white1 = max(0, cap0 - hp0), max(0, cap1 - hp1)
+        return max(0, cap0 - cap1), max(0, white1 - white0), max(0, white0 - white1), max(0, hp0 - hp1)
+    last_end = {}
+    for n_, c in enumerate(combos):
+        v = c['victim']
+        k0 = fidx.get(c['first']['frame'], 0); k1 = fidx.get(c['hits'][-1]['frame'], k0)
+        nxt = next((fidx.get(c2['first']['frame'], 10 ** 9) for c2 in combos[n_ + 1:] if c2['victim'] == v), 10 ** 9)
+        dmg, rec, cashed, hpd = life_change(v, k0, k1, last_end.get((v, c['round']), 0), nxt)
+        last_end[(v, c['round'])] = k1
+        c['damage'] = dmg if (dmg or rec) else max(h['attacker_combo_damage'] or 0 for h in c['hits'])
+        c['recoverable'], c['white_cashed'] = rec, cashed
 
     # ---- throws from stats (Throw counter increments)
     throw_frames = {'p1': [], 'p2': []}
@@ -289,16 +320,19 @@ def analyze(path, game_no, focus):
     for a, lst in throw_frames.items():
         v = 'p2' if a == 'p1' else 'p1'
         for t in lst:
-            if any(c['attacker'] == a and -10 <= c['first']['frame'] - t <= 90 for c in combos): continue
+            # a command grab's hits can land well after the Throw stat ticks (Arjun's Ghastly Interrogation: ~145 frames)
+            if any(c['attacker'] == a and -10 <= c['first']['frame'] - t <= (240 if 'Throw' in mname(names, a, c['first']['attacker_action_id']) else 90) for c in combos): continue
             if any(tp == v and abs(tf - t) <= 12 for tp, tf, _ in tech_events): continue  # teched
             k = fidx.get(t)
             if k is None: continue
             hp0 = fr[k][v]['hp']; hp1 = min(fr[j][v]['hp'] for j in range(k, min(len(fr), k + 100)))
             if hp0 - hp1 <= 0: continue
+            dmg, rec, cashed, _ = life_change(v, k, min(len(fr) - 1, k + 97))
             first = dict(frame=t, attacker=a, victim=v, attacker_action_id=fr[k][a]['action_id'], attacker_combo_damage=hp0 - hp1,
                          victim_damage_info=None, victim_hp=hp1, victim_posY=fr[k][v]['posY'], round=fr[k]['round'])
             combos.append({'attacker': a, 'victim': v, 'round': fr[k]['round'], 'first': first, 'hits': [first],
-                           'damage': hp0 - hp1, 'vs_parry': any(abs(t - x) <= 2 for x in throw_parry_frames)})
+                           'damage': dmg if (dmg or rec) else hp0 - hp1, 'recoverable': rec, 'white_cashed': cashed,
+                           'vs_parry': any(abs(t - x) <= 2 for x in throw_parry_frames)})
     combos.sort(key=lambda c: c['first']['frame'])
 
     rows = []
@@ -317,10 +351,17 @@ def analyze(path, game_no, focus):
             if x.get('act_st_name') not in ('DAMAGE',):
                 vst = x.get('act_st_name'); vmove_before = pretty(mname(names, v, x.get('action_id')), side_char[v]); break
         if not move.startswith(('ATK_', 'SPA_', 'SA', 'CAA', 'NG')):
+            found = False
             for x in reversed(lookback(h['frame'], a, 20)):
                 mv2 = mname(names, a, x.get('action_id'))
                 if mv2.startswith(('ATK_', 'SPA_', 'SA', 'CAA', 'NG')):
-                    move, label = mv2, pretty(mv2, side_char[a]); break
+                    move, label = mv2, pretty(mv2, side_char[a]); found = True; break
+            # lingering hitboxes set up earlier (Arjun's Divine Pillar and Breathing Ring hit while he walks or jumps)
+            if not found and side_char[a] in LINGER:
+                for x in reversed(lookback(h['frame'], a, 600)):
+                    mv2 = mname(names, a, x.get('action_id'))
+                    if mv2.startswith(LINGER[side_char[a]]):
+                        move, label = mv2, pretty(mv2, side_char[a]); trade = False; break
         ast_prev = [x.get('act_st_name') for x in lookback(h['frame'], a, 40)]
         vst_prev = [x.get('act_st_name') for x in lookback(h['frame'], v, 40)]
         vhist_prev = [x.get('blockstun') or 0 for x in lookback(h['frame'], v, 25)]
@@ -329,7 +370,8 @@ def analyze(path, game_no, focus):
         if vmove_before == 'Throw attempt' and (any(bb > 0 for bb in vhist_prev) or 'GETUP' in vst_prev[-30:]):
             vmove_before = 'Throw tech attempt'
         # kind
-        is_throw = move.startswith(('NGA', 'NGS')) or any(abs(t - h['frame']) <= 8 for t in throw_frames[a])
+        is_throw = move.startswith(('NGA', 'NGS')) or any(abs(t - h['frame']) <= 8 for t in throw_frames[a]) \
+            or ('Throw' in move and any(0 <= h['frame'] - t <= 240 for t in throw_frames[a]))   # command grabs
         kind = 'throw' if is_throw else 'clean hit'
         base = base_damage(char, label)
         first_dmg = h['attacker_combo_damage'] or 0
@@ -393,7 +435,7 @@ def analyze(path, game_no, focus):
         else: lens = 'Unclear / super'
         rows.append(dict(hit_id=f'{rid[:3]}-{n:02d}', set_id='Set 1', game_id=rid, game_no=game_no, round=rnd,
                          round_timer=timer, frame=h['frame'], attacker=side_name[a], victim=side_name[v],
-                         damage=c['damage'], hits_in_combo=len(c['hits']), starter=label, starter_raw=move,
+                         damage=c['damage'], recoverable=c.get('recoverable') or 0, white_cashed=c.get('white_cashed') or 0, hits_in_combo=len(c['hits']), starter=label, starter_raw=move,
                          first_hit_type=None, hit_kind=kind, first_hit_damage=first_dmg, first_hitstun=hstun,
                          anti_air=anti_air, situation=situation, lens=lens if side_name[v] == focus else None,
                          victim_state=vst, victim_move=vmove_before, note='reversal' if reversal else ('throw vs Drive Parry' if c.get('vs_parry') else ('trade' if trade else None))))
