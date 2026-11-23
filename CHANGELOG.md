@@ -3,6 +3,7 @@
 Notable changes to the SHOTOKAN review tooling and skills, newest first. Every push adds its changes here.
 
 ## 2026-11-22
+- sf6db.py: new `game_stats` table, the same metrics as `set_stats` per game with the character played, written on every ingest. `tools/game_stats_backfill.py` fills it for sets ingested earlier (from the stored hits, events and timings; press counts need a re-ingest).
 - Moved to the shotokan-sf6 organization (was shogberg/SF6-SHOTOKAN): links to shotokan-sf6/mods and shotokan-sf6/web.
 - batch/buckler_replays.py: pull a player's last 100 replay IDs from Buckler by CFN ID, for batch_record.py --file (BUCKLER_COOKIE in .env).
 - GETTING-STARTED.md: Buckler pulls, predictions on every review, lethal burnouts, every reviewed set in the database, gzipped captures, the dashboard tabs and the new web pages.

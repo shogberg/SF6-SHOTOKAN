@@ -73,7 +73,11 @@ CREATE TABLE IF NOT EXISTS dashboard_sets (   -- stable "Set N" numbering per da
   dashboard TEXT, set_key TEXT, set_no INTEGER, PRIMARY KEY (dashboard, set_key));
 CREATE INDEX IF NOT EXISTS ix_hits_set ON hits(set_key); CREATE INDEX IF NOT EXISTS ix_hits_victim ON hits(victim_id, lens);
 CREATE INDEX IF NOT EXISTS ix_sets_opp ON sets(opp_player_id); CREATE INDEX IF NOT EXISTS ix_sets_chars ON sets(focus_char, opp_char);
+CREATE TABLE IF NOT EXISTS game_stats (           -- same metrics as set_stats, per game, with the character played in that game
+  set_key TEXT REFERENCES sets ON DELETE CASCADE, replay_id TEXT, player_id INTEGER, character TEXT, metric TEXT, value REAL,
+  PRIMARY KEY (replay_id, player_id, metric));
 CREATE INDEX IF NOT EXISTS ix_stats_metric ON set_stats(metric, player_id);
+CREATE INDEX IF NOT EXISTS ix_game_stats_char ON game_stats(player_id, character, metric);
 
 -- views: who you play and which matchups
 CREATE VIEW IF NOT EXISTS v_sets AS
@@ -247,6 +251,12 @@ def ingest_set(con, outdir, meta):
                                                                                 x['hits_parried'], x['regained'], x['net'], int(bool(x['perfect'])), x['next']) for x in L('parries')])
     for pid, m in set_stats(hits, events, timings, games, names, presses).items():
         cur.executemany('INSERT INTO set_stats VALUES (?,?,?,?)', [(k, pid, a, b) for a, b in m.items()])
+    cur.execute('DELETE FROM game_stats WHERE set_key=?', (k,))
+    for g in games:   # per game too, so a player's stats can be split by character (and a mid-set character switch is split correctly)
+        gid = g['game_id']; only = lambda rows: [x for x in rows if x.get('game_id') == gid]
+        for name, pid in names.items():
+            m = set_stats(only(hits), only(events), only(timings), [g], {name: pid}, only(presses) if presses else None)[pid]
+            cur.executemany('INSERT OR REPLACE INTO game_stats VALUES (?,?,?,?,?,?)', [(k, gid, pid, charof.get((gid, name)), a, b) for a, b in m.items()])
     rep = os.path.join(outdir, 'report.md')
     if os.path.exists(rep):
         import ast, re
