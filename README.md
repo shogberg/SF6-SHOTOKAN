@@ -16,7 +16,7 @@ Replay reviews for Street Fighter 6. Claude reads each game's REFramework captur
 ### Input
 - **Capture files (`.json`)**: recorded by `tools/capture_replay.lua` while a replay plays back in REFramework. Each one holds both players' state every frame: move, action state, HP, Drive, super, burnout, position, hitstun/blockstun and inputs, plus the game's own battle stats.
 - **Videos (`.mp4`)**: the same replays recorded with OBS. They're used to check moments the data can't explain (intent, a read, a super cinematic) and to cut clips.
-- **Replays folder**: `D:\SF6-Claude-Coaching\replays` is the default store. A review can also point at any other folder (e.g. `Juniper`).
+- **Replays folder**: `$SHOTOKAN_HOME/replays` (e.g. `D:\SF6-Claude-Coaching\replays`) is the default store; see [Paths](#paths). A review can also point at any other folder (e.g. `Juniper`).
 - **Local or offline matches** save no names, ranks or round results. Sean gives the player names, and round winners come from HP: the first player to reach 0, or whoever had more HP on a timeout.
 
 ### Analysis
@@ -209,4 +209,18 @@ When a player has history in the database, the dashboard compares this set with 
 
 The in-game scripts (`capture_replay.lua`, `export_moves.lua`, `batch_replays.lua`) live in the separate REFramework mods repo, [shotokan-sf6/mods](https://github.com/shotokan-sf6/mods). That repo also ships move names for the full roster in `data/sf6_moves/`; point the analyzer at them with `SF6_MOVES=<path to data/sf6_moves>` so hits and habits use move names instead of action IDs.
 
-Not in this repo, on purpose: the history database, capture files, replays and videos, and the review dashboards. They hold match data about real players. Some scripts still have the author's local paths (`D:\SF6-Claude-Coaching`, working folders) as defaults; change them for your setup.
+Not in this repo, on purpose: the history database, capture files, replays and videos, and the review dashboards. They hold match data about real players.
+
+### Paths
+No script has a machine-specific path in its code. They read environment variables, or `tools/.env` (copy `tools/.env.example`; it's gitignored). `tools/paths.py` resolves them:
+
+| Variable | What it points at | Default |
+|---|---|---|
+| `SHOTOKAN_HOME` | The coaching folder (replays, history, reviews) | The folder above `tools/` |
+| `SHOTOKAN_REPLAYS` | Capture files and videos | `$SHOTOKAN_HOME/replays` |
+| `SHOTOKAN_DB` | The history database | `$SHOTOKAN_HOME/history/sf6.db` |
+| `SHOTOKAN_CAPTURE_DIRS` | Extra folders to search for captures (`;`-separated on Windows) | none |
+| `SHOTOKAN_RANKED_DIR` | `ranked_build.py`'s working folder | `$SHOTOKAN_HOME/ranked` |
+| `SF6_MOVES` | Move-name files (`data/sf6_moves` from the mods repo) | none (action IDs instead of names) |
+
+Captures are found by replay ID or file name in those folders, as `.json` or `.json.gz`, so a capture path stored in the database on another machine still resolves. The batch recorder reads the same `SHOTOKAN_HOME` / `SHOTOKAN_REPLAYS` from `batch/.env` (`REPLAYS_DIR` still works). Paths in the docs and skills, like `D:\SF6-Claude-Coaching`, are examples.

@@ -2,27 +2,22 @@
 
 sf6db.py ingest runs this for the set it just ingested. Four axes (Composure, Initiative, Resource use,
 Temperament (offense)) read behaviour counts from beh_cache.json; replays missing from the cache are added first,
-from the captures (META captures_local, games.capture_file, or the replays folder next to tools).
+from the captures (META captures_local, else the capture folders in paths.py: SHOTOKAN_REPLAYS / SHOTOKAN_CAPTURE_DIRS).
 
   python spectra_backfill.py DB              # every set without spectra
   python spectra_backfill.py DB SET_KEY ...  # these sets (recomputed even if present)
 """
 import json, sqlite3, sys, os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import quick_dashboard_from_db as W, spectra as SP
+import quick_dashboard_from_db as W, spectra as SP, paths
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 
 def _find(rid, cf, local):
-    cands = [local.get(rid)] if local and local.get(rid) else []
-    if cf:
-        base = cf.replace('\\', '/').split('/')[-1]
-        stem = base[:-3] if base.endswith('.gz') else base
-        for d in (os.path.join(HERE, '..', 'replays'), os.path.join(HERE, '..', 'replays', '_to_delete')):
-            cands += [os.path.join(d, stem + '.gz'), os.path.join(d, stem)]
-        cands.append(cf)
-    return next((c for c in cands if c and os.path.exists(c)), None)
+    if local and local.get(rid) and os.path.exists(local[rid]):
+        return local[rid]
+    return paths.find_capture(cf or rid) or paths.find_capture(rid)
 
 
 def ensure_behavior(con, key, local=None):

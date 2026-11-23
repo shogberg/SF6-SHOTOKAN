@@ -29,7 +29,11 @@ except ImportError:
     pass
 
 DATA = Path(os.getenv("REFRAMEWORK_DATA", r"C:\Program Files (x86)\Steam\steamapps\common\Street Fighter 6\reframework\data"))
-REPLAYS = Path(os.getenv("REPLAYS_DIR", r"D:\SF6-Claude-Coaching\replays"))
+_home = os.getenv("SHOTOKAN_HOME")
+_replays = os.getenv("SHOTOKAN_REPLAYS") or os.getenv("REPLAYS_DIR") or (os.path.join(_home, "replays") if _home else None)
+if not _replays:
+    sys.exit("Set SHOTOKAN_REPLAYS (or SHOTOKAN_HOME, or REPLAYS_DIR) in batch/.env: the folder captures and videos are moved to.")
+REPLAYS = Path(_replays)
 BATCH = DATA / "sf6_batch"
 OBS_HOST = os.getenv("OBS_HOST", "localhost")
 OBS_PORT = int(os.getenv("OBS_PORT", "4455"))

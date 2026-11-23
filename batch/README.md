@@ -2,7 +2,7 @@
 
 Records SF6 replays by replay ID with no clicking: `batch_replays.lua` (inside SF6) searches and plays
 each replay, `capture_replay.lua` saves the frame capture, and `batch_record.py` drives OBS and files
-the results as `<ID>.mp4` + `<ID>.json` in `D:\SF6-Claude-Coaching\replays`.
+the results as `<ID>.mp4` + `<ID>.json` in your replays folder (`SHOTOKAN_REPLAYS`, or `SHOTOKAN_HOME\replays`, set in `batch/.env`; e.g. `D:\SF6-Claude-Coaching\replays`).
 
 ## Setup (once)
 1. Copy `batch_replays.lua` (from the REFramework mods repo) into `Street Fighter 6\reframework\autorun\` (next to `capture_replay.lua`).

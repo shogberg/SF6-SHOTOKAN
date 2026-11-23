@@ -10,24 +10,19 @@ getting up (the same count as the `decision_presses` stat). For each one, analyz
 --player takes a name, or several names of one player separated by commas (the first is the label).
 Prints, per player, presses per round by situation, outcome rates per situation and the top moves per situation.
 Throw presses on wake-up or after blocking are defensive, so the summary calls them throw techs.
-Captures are found from games.capture_file, falling back to DIR (default: the capture's folder) as .json or .json.gz.
+Captures are found by the file name in games.capture_file (.json or .json.gz), in --replays DIR first, then the capture
+folders from paths.py (SHOTOKAN_REPLAYS, SHOTOKAN_CAPTURE_DIRS). DB defaults to SHOTOKAN_DB.
 """
 import argparse, collections as C, json, os, sqlite3, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import analyze_capture as A
+import analyze_capture as A, paths
 
 GOOD = ('clean hit', 'counter hit', 'punish counter', 'throw', 'reversal')
 CTX = ['neutral close', 'neutral mid', 'neutral far', 'after blocking', 'wake-up', 'own pressure', 'oki', 'after a hit', 'vs a jump', 'air button']
 
 
 def find_capture(cf, rdir):
-    base = cf.replace('\\', '/').split('/')[-1]
-    stem = base[:-3] if base.endswith('.gz') else base
-    for d in [x for x in (rdir, os.path.dirname(cf.replace('\\', '/'))) if x]:
-        for b in (stem, stem + '.gz'):
-            p = os.path.join(d, b)
-            if os.path.exists(p): return p
-    return None
+    return paths.find_capture(cf, extra=(rdir,))
 
 
 def collect(db, players, char, rdir):
@@ -84,7 +79,7 @@ def summary(D, players):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('db'); ap.add_argument('--player', action='append', required=True)
+    ap.add_argument('db', nargs='?', default=paths.DB); ap.add_argument('--player', action='append', required=True)
     ap.add_argument('--char'); ap.add_argument('--replays'); ap.add_argument('--out')
     a = ap.parse_args()
     D = collect(a.db, a.player, a.char, a.replays)

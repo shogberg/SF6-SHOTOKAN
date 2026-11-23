@@ -3,7 +3,7 @@ Re-reads each game that has burnout events with the analyzer and relabels the ma
 usage: lethal_backfill.py WORK_DB LOG.json [FOCUS_PLAYER]"""
 import json, os, sqlite3, sys, collections as C
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import analyze_capture as A
+import analyze_capture as A, paths
 db, logp = sys.argv[1], sys.argv[2]
 FOCUS = sys.argv[3] if len(sys.argv) > 3 else ''
 con = sqlite3.connect(db); con.row_factory = sqlite3.Row
@@ -11,11 +11,10 @@ done = json.load(open(logp)) if os.path.exists(logp) else {}
 games = con.execute("SELECT DISTINCT e.set_key, e.replay_id, g.game_no FROM events e JOIN games g ON g.replay_id=e.replay_id AND g.set_key=e.set_key WHERE e.type='burnout'").fetchall()
 name = {r['player_id']: r['name'] for r in con.execute('SELECT player_id, name FROM players')}
 pid = {v: k for k, v in name.items()}
-R = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'replays')
 for g in games:
     key = g['set_key'] + '|' + g['replay_id']
     if key in done: continue
-    path = next((os.path.join(R, g['replay_id'] + e) for e in ('.json', '.json.gz') if os.path.exists(os.path.join(R, g['replay_id'] + e))), None)
+    path = paths.find_capture(g['replay_id'])
     if not path: done[key] = 'no capture'; continue
     try: res = A.analyze(path, g['game_no'], FOCUS)
     except Exception as ex: done[key] = f'error {ex}'; continue

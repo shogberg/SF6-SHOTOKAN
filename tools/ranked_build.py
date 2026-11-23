@@ -4,9 +4,11 @@ Reads analyzer output in ranked/a/<key>/ for every set in SETS (built from log.t
 writes ranked/data/*.json: per-set rows tagged with set_id (continuing after the quick-dashboard's
 Set 1 and Set 2) plus overview datasets. Per-set notes are generated from capture stats.
 """
-import json, os, ast, re, collections as C
+import json, os, sys, ast, re, collections as C
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import paths
 
-ROOT = '/home/claude/sf6/ranked'
+ROOT = os.environ.get('SHOTOKAN_RANKED_DIR') or os.path.join(paths.HOME, 'ranked')   # the working folder (ranked/a/<key>/, log.tsv)
 OUT = f'{ROOT}/data'
 os.makedirs(OUT, exist_ok=True)
 ME = '.shog'
@@ -83,7 +85,8 @@ def build_set(sid, order, key, rows):
     tim = json.load(open(f'{A}/timings.json'))
     games = json.load(open(f'{A}/games.json'))
     st = json.load(open(f'{A}/sets.json'))[0]
-    info = [json.load(open(f'/mnt/user-data/uploads/data/{r["id"]}.json'))['info'] for r in rows]
+    import sf6db
+    info = [sf6db.load_info(paths.find_capture(r['id'])) for r in rows]
     side = ['p1' if i['p1_name'] == ME else 'p2' for i in info]
     oppc = char(info[0]['p2_char' if side[0] == 'p1' else 'p1_char'])
     use = usage(f'{A}/report.md')
