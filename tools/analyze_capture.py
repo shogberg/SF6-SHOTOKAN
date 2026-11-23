@@ -749,7 +749,54 @@ def analyze(path, game_no, focus):
                 if fr[k][o].get('act_st_name') not in BUSY_ST: pc[key_]['decision_presses'] += 1
     presses = [dict(game_id=rid, round=r_, player=p_, presses=c_['presses'], decision_presses=c_['decision_presses']) for (p_, r_), c_ in sorted(pc.items(), key=lambda x: (x[0][1], x[0][0]))]
 
-    return dict(info=info, rows=rows, events=events, winners=winners, timings=timings, usage=usage, side_name=side_name, side_char=side_char, resources=resources, parries=parries, presses=presses)
+    # ---- decision presses in detail (tools/decision_presses.py): for each decision press, the situation (from the
+    # 20 frames before: air button, vs a jump, wake-up, after blocking, own pressure, oki, after a hit, or neutral by
+    # distance), what the opponent was doing, and the first thing that happened within ~70 frames.
+    decisions = []
+    MOVE_ST = ('ATCK', 'SPECIAL', 'SUPER', 'THROW')
+    by_att = C.defaultdict(dict)
+    for r_ in rows: by_att[r_['attacker']].setdefault(r_['frame'], r_)
+    for side in ('p1', 'p2'):
+        o = other[side]
+        for k in range(1, len(fr)):
+            a_, pa_ = fr[k][side], fr[k - 1][side]
+            if not (a_.get('act_st_name') in MOVE_ST and pa_.get('act_st_name') not in MOVE_ST and fr[k]['round'] == fr[k - 1]['round']): continue
+            ob = fr[k][o]
+            if ob.get('act_st_name') in BUSY_ST: continue
+            mv = pretty(mname(names, side, a_.get('action_id')), side_char[side])
+            dist = abs((a_.get('posX') or 0) - (ob.get('posX') or 0))
+            prev = [fr[j][side] for j in range(max(0, k - 20), k)]
+            oprev = [fr[j][o] for j in range(max(0, k - 20), k)]
+            if (a_.get('posY') or 0) > 0.3 or a_.get('act_st_name') in JUMP_STATES: ctx = 'air button'
+            elif (ob.get('posY') or 0) > 0.3 or ob.get('act_st_name') in JUMP_STATES: ctx = 'vs a jump'
+            elif any(x.get('act_st_name') == 'GETUP' for x in prev): ctx = 'wake-up'
+            elif any((x.get('blockstun') or 0) > 0 for x in prev): ctx = 'after blocking'
+            elif any((x.get('blockstun') or 0) > 0 for x in oprev): ctx = 'own pressure'
+            elif any(x.get('act_st_name') == 'GETUP' for x in oprev): ctx = 'oki'
+            elif any(x.get('act_st_name') == 'DAMAGE' for x in oprev): ctx = 'after a hit'
+            elif dist < 1.3: ctx = 'neutral close'
+            elif dist < 2.6: ctx = 'neutral mid'
+            else: ctx = 'neutral far'
+            ost = ob.get('act_st_name')
+            opp_doing = 'pressing' if ost in MOVE_ST else ('blocking' if ost == 'DEF' or (ob.get('blockstun') or 0) > 0 else ('parrying' if ost == 'PARRY' else ('rushing/dashing' if ost in ('DASH', 'KDASH') or 'RUSH' in mname(names, o, ob.get('action_id')) else 'other')))
+            out_, dmg = 'whiffed / nothing', 0
+            done = None
+            for j in range(k, min(len(fr), k + 70)):
+                fi = fr[j]['i']
+                if fr[j]['round'] != fr[k]['round']: break
+                r1 = by_att[side_name[side]].get(fi)
+                if r1: out_, dmg = r1['hit_kind'], r1['damage']; break
+                r2 = by_att[side_name[o]].get(fi)
+                if r2:
+                    out_ = ('got ' + r2['hit_kind']) if done is None else ('whiff punished' if r2['hit_kind'] in ('counter hit', 'punish counter') else 'got hit after')
+                    dmg = -r2['damage']; break
+                if (fr[j][o].get('blockstun') or 0) > 0 and fr[j][o].get('act_st_name') != 'DAMAGE': out_ = 'blocked'; break
+                if fr[j][o].get('act_st_name') == 'PARRY' and j > k: out_ = 'parried'; break
+                if done is None and fr[j][side].get('act_st_name') not in MOVE_ST: done = j
+                if done is not None and j - done > 25: break
+            decisions.append(dict(game_id=rid, round=fr[k]['round'] + 1, round_timer=fr[k]['round_timer'], side=side, player=side_name[side],
+                                  move=mv, ctx=ctx, dist=round(dist, 2), opp=opp_doing, outcome=out_, damage=dmg))
+    return dict(decisions=decisions, info=info, rows=rows, events=events, winners=winners, timings=timings, usage=usage, side_name=side_name, side_char=side_char, resources=resources, parries=parries, presses=presses)
 
 
 def main():
