@@ -225,4 +225,13 @@ No script has a machine-specific path in its code. They read environment variabl
 | `SHOTOKAN_RANKED_DIR` | `ranked_build.py`'s working folder | `$SHOTOKAN_HOME/ranked` |
 | `SF6_MOVES` | Move-name files (`data/sf6_moves` from the mods repo) | none (action IDs instead of names) |
 
+### Player
+The player in focus (you) is set once, not in code. `tools/paths.py` reads `SHOTOKAN_PLAYER` / `SHOTOKAN_CFN_ID` from the environment or `.env`, else `$SHOTOKAN_HOME/shotokan.json`:
+
+```json
+{"player_name": ".shog", "other_names": ["shog"], "cfn_id": "1307078698", "main_character": "Cammy", "control": "Classic"}
+```
+
+`player_name` is your in-game name; `other_names` lists names you've used before (decision_presses.py counts them as you); `cfn_id` is your Buckler short ID. The Claude plugin's setup skill writes this file. Tools that need a player (`sf6db.py history`, `profiles_from_db.py`, `quick_dashboard_from_db.py`, `overview_from_db.py`, `ranked_build.py`, `spectra_backfill.py`, `decision_presses.py`) use it when you don't pass one, and stop with a clear message when neither is set. `batch/buckler_replays.py` uses `cfn_id` when no CFN ID is given. Reviewing someone else: pass their name (`--player`, `--me`) as before.
+
 Captures are found by replay ID or file name in those folders, as `.json` or `.json.gz`, so a capture path stored in the database on another machine still resolves. The batch recorder reads the same `SHOTOKAN_HOME` / `SHOTOKAN_REPLAYS` from `batch/.env` (`REPLAYS_DIR` still works). Paths in the docs and skills, like `D:\SF6-Claude-Coaching`, are examples.
