@@ -28,7 +28,8 @@ This guide is for someone who has never used Claude. By the end you'll have reco
 4. **Upload them.** In Claude, go to **Customize → Skills**, click **+**, then **+ Create skill → Upload a skill**, and choose the zip. Repeat for each skill.
 
 Upload at least these:
-- `sf6-replay-analysis`: the review itself;
+- `sf6-replay-analysis`: the entry point, which loads the three review tiers below;
+- `shared-core-review`, `quick-review-report` and `full-review-report`: the review itself, in tiers (every review, the stats layer, the hand-written layer);
 - `sf6-review-dashboard`: the dashboard it builds;
 - `replay-review-prediction`: predicts each set before reviewing it, then grades the prediction;
 - `sf6-drive-efficiency`: Drive and super spending;

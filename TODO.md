@@ -8,6 +8,10 @@ Ideas and planned work for SHOTOKAN (the replay-review tooling and skills). Newe
 - [ ] **Matchup-specific punishes:** know what is and isn't punishable per matchup (e.g. Cammy can't always punish Blanka Ball), so reviews don't flag a "missed punish" that wasn't there.
 - [ ] **Missed whiff punishes:** find whiff-punish openings that went unused; possibly simulate other buttons to see which would have counter-hit.
 
+## Review tiers
+- [ ] **sf6-coach-shog in Quick reviews?** Since the tier split (2026-11-24) it loads only in full-review-report. Try a few Quick reviews with and without it and decide whether some of its rules (2MK confirms, wake-up options, taking throws, risk vs skill gap) should move into quick-review-report.
+- [ ] Which other parts of a review benefit from hand-written notes and which can be generated (Sean's open question, 2026-11-18); move work between the tiers accordingly.
+
 ## Beyond the guideline skills
 - [ ] Look past the skills set by Sean or built from YouTube guides. Once sequence / structure analysis works better, track meta ideas long term: game plans, offensive structure and the sequences players use.
 

@@ -2,12 +2,17 @@
 
 The Claude skills SHOTOKAN reviews run on. A skill is a folder with a `SKILL.md`: instructions Claude loads when a task matches its description.
 
-Two skills keep a short `SKILL.md` and put the detail in a `references/` folder read only when a step needs it: `sf6-replay-analysis` and `sf6-review-dashboard`. The live account versions read those files from `<coaching folder>\skill-refs\<skill>\`, so copy each skill's `references/` there when it changes.
+A review runs in tiers: `sf6-replay-analysis` is the entry point and loads `shared-core-review`, then `quick-review-report`, then (Full and Tournament reviews) `full-review-report`. The review-step scripts carry the same prefixes (`shared_core_*.py`, `quick_review_*.py`, `full_review_*.py`).
+
+`shared-core-review`, `full-review-report` and `sf6-review-dashboard` keep a short `SKILL.md` and put the detail in a `references/` folder read only when a step needs it. The live account versions read those files from `<coaching folder>\skill-refs\<skill>\`, so copy each skill's `references/` there when it changes.
 
 ## In this folder
 | Skill | What it does |
 |---|---|
-| [sf6-replay-analysis](sf6-replay-analysis/SKILL.md) | The review method: reading REFramework captures (and video), the analyzer, frame data, habits, the history database, review levels, logging. Loads the other skills. |
+| [sf6-replay-analysis](sf6-replay-analysis/SKILL.md) | Entry point: picks Quick, Full or Tournament and loads the tiers in order. |
+| [shared-core-review](shared-core-review/SKILL.md) | Every review: setup, played order, blind prediction, the analyzer, capture storage, the sf6.db ingest, grading, wording and data rules. |
+| [quick-review-report](quick-review-report/SKILL.md) | Stats layer: generated reads and habits, the numbers to pull, lessons held, the Quick reply. The draft a Full review starts from. |
+| [full-review-report](full-review-report/SKILL.md) | Hand-written layer: guideline skills, frame data, video checks, chess or poker, the review_docs datasets, the Full reply, Tournament reviews. |
 | [sf6-review-dashboard](sf6-review-dashboard/SKILL.md) | Dashboard format: datasets, page sections, the Story of the Set, local and standalone copies. |
 | [replay-review-prediction](replay-review-prediction/SKILL.md) | Predict each set before reviewing it, then grade the prediction. |
 | [sf6-drive-efficiency](sf6-drive-efficiency/SKILL.md) | Value of Drive and super spending on offense and defense. |

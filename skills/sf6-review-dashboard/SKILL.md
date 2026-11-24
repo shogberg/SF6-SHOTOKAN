@@ -79,7 +79,7 @@ HTML hooks the page needs:
 - Tables: `t_punish`, and `t_hits` (inside the closed details, with the `#hit-filter` select).
 
 ## 10. Local copies
-Save to `D:\SF6-Claude-Coaching\reviews\<YYYY-MM>\<review folder>\review\` (folder naming as in sf6-replay-analysis section 0; write via /mnt/user-data/outputs + device_commit_files):
+Save to `D:\SF6-Claude-Coaching\reviews\<YYYY-MM>\<review folder>\review\` (folder naming as in shared-core-review; write via /mnt/user-data/outputs + device_commit_files):
 - `<name>.html`: a standalone page for Sean's webserver.
   - Same HTML without the meta line.
   - d3 **inlined** (not from a CDN).

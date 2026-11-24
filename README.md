@@ -20,7 +20,7 @@ Replay reviews for Street Fighter 6. Claude reads each game's REFramework captur
 - **Local or offline matches** save no names, ranks or round results. Sean gives the player names, and round winners come from HP: the first player to reach 0, or whoever had more HP on a timeout.
 
 ### Analysis
-- `tools/analyze_capture.py` turns the captures into datasets:
+- `tools/shared_core_analyze.py` turns the captures into datasets:
   - every damaging hit or combo: damage, starter, hit kind, anti-air, situation, what the victim was doing;
   - burnouts and perfect parries;
   - Drive Parries;
@@ -47,11 +47,11 @@ Replay reviews for Street Fighter 6. Claude reads each game's REFramework captur
 - `history\sf6.db` (SQLite) keeps every reviewed set, game, hit, event, resource row, parry and review doc.
 - It's used to:
   - compare a player with their own history (e.g. "shog tonight vs his history");
-  - compare players with each other (`tools/decision_presses.py`: where they press, with which buttons, and what it leads to);
+  - compare players with each other (`tools/full_review_decision_presses.py`: where they press, with which buttons, and what it leads to);
   - make predictions before a set;
   - score player spectra against everyone reviewed so far.
-- **Blind predictions:** `tools/blind_manifest.py` gives the pre-set facts without anything that leaks the result (round results, later games' MR, the number of games); `sf6db.py history` gathers history only from sets before the one predicted; `sf6db.py predict` stores the prediction before the analyzer runs, refuses once the set is ingested, and ingest links and grades it (`predictions` table).
-- `sf6db.py ingest` also computes the set's eight spectra and adds its replays to the behaviour cache first (`--no-spectra` skips it). `tools/spectra_backfill.py` fills sets that have none.
+- **Blind predictions:** `tools/shared_core_blind_manifest.py` gives the pre-set facts without anything that leaks the result (round results, later games' MR, the number of games); `shared_core_db.py history` gathers history only from sets before the one predicted; `shared_core_db.py predict` stores the prediction before the analyzer runs, refuses once the set is ingested, and ingest links and grades it (`predictions` table).
+- `shared_core_db.py ingest` also computes the set's eight spectra and adds its replays to the behaviour cache first (`--no-spectra` skips it). `tools/spectra_backfill.py` fills sets that have none.
 - When the analyzer's counting changes, `tools/rescore_damage.py` re-scores damage in an existing database from the captures without re-ingesting, `lethal_backfill.py` / `game_stats_backfill.py` apply older rule changes, and `relabel_moves.py DB OLD_ANALYZER.py MOVES_DIR` brings stored move labels up to date after the analyzer learns new move names (it compares the old and new analyzer on each character's move export); `relabel_resolve.py` settles the labels it reports as ambiguous from the captures.
 
 ### Review levels
@@ -197,12 +197,12 @@ When a player has history in the database, the dashboard compares this set with 
 
 | Path | What it is |
 |---|---|
-| `tools/analyze_capture.py` | Turns REFramework capture files into review datasets (hits, events, parries, resources, timings). |
-| `tools/sf6db.py`, `rank.py`, `spectra.py`, `behavior.py`, `beh_cache.py` | The history database (SQLite) and the player spectra and behaviour stats. |
+| `tools/shared_core_analyze.py` | Turns REFramework capture files into review datasets (hits, events, parries, resources, timings). |
+| `tools/shared_core_db.py`, `rank.py`, `spectra.py`, `behavior.py`, `beh_cache.py` | The history database (SQLite) and the player spectra and behaviour stats. |
 | `tools/spectra_backfill.py`, `rescore_damage.py`, `lethal_backfill.py`, `game_stats_backfill.py`, `relabel_moves.py`, `relabel_resolve.py` | Bring an existing database up to date after a rule change: spectra, damage (white health), lethal burnouts, per-game stats, move names. |
-| `tools/blind_manifest.py` | Pre-set facts for a blind prediction (first game's header only). |
-| `tools/decision_presses.py` | Compare players' decision presses: per round by situation, outcome rates, top moves per situation. |
-| `tools/quick_dashboard_from_db.py`, `overview_from_db.py`, `profiles_from_db.py`, `sf6db_export.py`, `ranked_build.py` | Build dashboard datasets, overviews and player profiles from the database. The quick-dashboard they fed is retired ([archive](docs/archive/quick-dashboard.md)); `quick_dashboard_from_db.py --write-reads` is still run after a Quick review to write its reads and habits to the database. |
+| `tools/shared_core_blind_manifest.py` | Pre-set facts for a blind prediction (first game's header only). |
+| `tools/full_review_decision_presses.py` | Compare players' decision presses: per round by situation, outcome rates, top moves per situation. |
+| `tools/quick_review_reads.py`, `overview_from_db.py`, `profiles_from_db.py`, `sf6db_export.py`, `ranked_build.py` | Build dashboard datasets, overviews and player profiles from the database. The quick-dashboard they fed is retired ([archive](docs/archive/quick-dashboard.md)); `quick_review_reads.py --write-reads` is still run after a Quick review to write its reads and habits to the database. |
 | `tools/standalone.py`, `standalone_head.html`, `standalone_shim.js`, `summary_md.py`, `check_page.py` | Offline HTML copies of dashboards, summaries and page checks. |
 | `tools/drive_contact.py`, `drive_measure.py` | Drive gauge measurement helpers. |
 | `tools/base_damage.json`, `tools/enums.json` | Base damage per move and the game enums the analyzer reads. |
@@ -232,6 +232,6 @@ The player in focus (you) is set once, not in code. `tools/paths.py` reads `SHOT
 {"player_name": ".shog", "other_names": ["shog"], "cfn_id": "1307078698", "main_character": "Cammy", "control": "Classic"}
 ```
 
-`player_name` is your in-game name; `other_names` lists names you've used before (decision_presses.py counts them as you); `cfn_id` is your Buckler short ID. The Claude plugin's setup skill writes this file. Tools that need a player (`sf6db.py history`, `profiles_from_db.py`, `quick_dashboard_from_db.py`, `overview_from_db.py`, `ranked_build.py`, `spectra_backfill.py`, `decision_presses.py`) use it when you don't pass one, and stop with a clear message when neither is set. `batch/buckler_replays.py` uses `cfn_id` when no CFN ID is given. Reviewing someone else: pass their name (`--player`, `--me`) as before.
+`player_name` is your in-game name; `other_names` lists names you've used before (full_review_decision_presses.py counts them as you); `cfn_id` is your Buckler short ID. The Claude plugin's setup skill writes this file. Tools that need a player (`shared_core_db.py history`, `profiles_from_db.py`, `quick_review_reads.py`, `overview_from_db.py`, `ranked_build.py`, `spectra_backfill.py`, `full_review_decision_presses.py`) use it when you don't pass one, and stop with a clear message when neither is set. `batch/buckler_replays.py` uses `cfn_id` when no CFN ID is given. Reviewing someone else: pass their name (`--player`, `--me`) as before.
 
 Captures are found by replay ID or file name in those folders, as `.json` or `.json.gz`, so a capture path stored in the database on another machine still resolves. The batch recorder reads the same `SHOTOKAN_HOME` / `SHOTOKAN_REPLAYS` from `batch/.env` (`REPLAYS_DIR` still works). Paths in the docs and skills, like `D:\SF6-Claude-Coaching`, are examples.

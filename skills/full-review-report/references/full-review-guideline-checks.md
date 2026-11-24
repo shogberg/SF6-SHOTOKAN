@@ -1,6 +1,6 @@
 # Guideline skills: what each one checks
 
-Part of the sf6-replay-analysis skill (the list the core loads every review). Read when the skill points here.
+Part of the full-review-report skill (the guideline skills a Full review loads). Read when the skill points here.
 
 **Guideline skills to load every review.** Before analysing any replay, load each of these skills with the Skill tool and apply them alongside this one:
 - `sf6-the-defense-equation-exdojo`: judging defensive decisions (risk/reward vs the take-the-throw baseline, the six modifiers, frequency and conditioning, "could you have guessed better?").
