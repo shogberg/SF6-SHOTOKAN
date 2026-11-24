@@ -2,6 +2,11 @@
 
 Notable changes to the SHOTOKAN review tooling and skills, newest first. Every push adds its changes here.
 
+## 2026-11-24 (later)
+- M. Bison's moves are named: Scissor Kicks (Double Knee Press; L, M/H and OD), Shadow Rise and its follow-ups (Head Press, Somersault Skull Diver, Devil Reverse), Backfist Combo, Psycho Crusher Attack, Bison Warp, Psycho Mine explosion, his 5MP target combos, SA1 Knee Press Nightmare, SA2 Psycho Punisher, SA3 Unlimited Psycho Crusher and the Critical Art. His supers now count in the Risk tolerance spectrum.
+- Cammy's Hooligan Combination and its follow-ups are named (Razor's Edge Slicer, Fatal Leg Twister, Reverse Edge, Silent Step), plus Lift Combination (4MP~HK) and her 5HP~HK target combo. They used to show as FC_*, RAZEREDGE, REVEDGE and so on.
+- New `tools/relabel_moves.py DB OLD_ANALYZER.py MOVES_DIR`: brings stored move labels up to date by labelling every move in each character's export with the old and the new analyzer and swapping the labels that changed (ambiguous ones are reported and left). Replaces the Ken-only `ken_relabel.py`. Run on sf6.db: 80 hits, 10 timings and 411 usage rows relabelled, damage unchanged.
+
 ## 2026-11-24
 - Ken's moves are named: Jinrai Kick and its follow-ups (Kazekama Shin Kick low, Gorai Axe Kick overhead, Senka Snap Kick, Kasai Thrust Kick after OD Jinrai; the analyzer used to call the follow-ups "Jinrai Kick (L/M/H)"), Quick Dash > Thunder Kick / Forward Step Kick / Emergency Stop, Chin Buster (5MP~HP), Triple Flash Kick, SA1 Dragonlash Flame, SA2 Shippu Jinrai-kyaku, SA3 Shinryu Reppa and the Critical Art. Follow-ups were identified from the capture sequences (the "M" follow-up hit crouch-blockers, so it's the overhead). Ken's supers now count in the Risk tolerance spectrum. New `tools/ken_relabel.py DB` brings an existing database's Ken labels up to date without re-ingesting.
 - Quick-dashboard retired as a review step: sf6-replay-analysis no longer ingests with `dash` or uploads dashboard data. After a Quick review, `quick_dashboard_from_db.py --write-reads` still writes its reads and habits to the database. How the dashboard was built is kept in `docs/archive/quick-dashboard.md`.
