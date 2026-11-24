@@ -2,6 +2,8 @@
 
 The Claude skills SHOTOKAN reviews run on. A skill is a folder with a `SKILL.md`: instructions Claude loads when a task matches its description.
 
+Two skills keep a short `SKILL.md` and put the detail in a `references/` folder read only when a step needs it: `sf6-replay-analysis` and `sf6-review-dashboard`. The live account versions read those files from `<coaching folder>\skill-refs\<skill>\`, so copy each skill's `references/` there when it changes.
+
 ## In this folder
 | Skill | What it does |
 |---|---|
