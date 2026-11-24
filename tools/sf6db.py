@@ -7,6 +7,14 @@ sets, games, the analyzer's hits / events / timings, per-set stats, player reads
   python sf6db.py ingest DB ANALYZER_OUTDIR META.json      # one set; META describes it (see ingest_set); also
                                                           # computes its spectra (spectra_backfill.py), --no-spectra to skip
   python sf6db.py sql   DB "SELECT ..."                   # ad-hoc query, prints rows
+  python sf6db.py predict DB PREDICTION.json [--replace]  # store a blind prediction BEFORE the analyzer runs
+  python sf6db.py history DB --opp NAME|CFN [--opp-char C] [--player NAME|CFN] [--my-char C] [--before ISO] [--exclude ID,ID]
+                                                          # pre-set history for a prediction, only from earlier sets
+
+Blind predictions: build the pre-set facts with blind_manifest.py (no results, no later MR), gather history with
+`history` (only sets before the one predicted), write PREDICTION.json and store it with `predict` before running the
+analyzer. `predict` refuses a set whose games are already in the database, and a stored prediction can't be replaced
+once its set is ingested. Ingest links the prediction to its set and records the grade from review_docs.prediction.
 
 Re-ingesting a set replaces it (same set_key), so a set can be re-analysed without duplicates.
 """
@@ -74,6 +82,9 @@ CREATE TABLE IF NOT EXISTS dashboard_sets (   -- stable "Set N" numbering per da
   dashboard TEXT, set_key TEXT, set_no INTEGER, PRIMARY KEY (dashboard, set_key));
 CREATE INDEX IF NOT EXISTS ix_hits_set ON hits(set_key); CREATE INDEX IF NOT EXISTS ix_hits_victim ON hits(victim_id, lens);
 CREATE INDEX IF NOT EXISTS ix_sets_opp ON sets(opp_player_id); CREATE INDEX IF NOT EXISTS ix_sets_chars ON sets(focus_char, opp_char);
+CREATE TABLE IF NOT EXISTS predictions (          -- blind pre-set predictions, stored before the analyzer runs (sf6db.py predict)
+  prediction_id INTEGER PRIMARY KEY, replay_ids TEXT NOT NULL UNIQUE, set_key TEXT, written_at TEXT NOT NULL, stored_at TEXT NOT NULL,
+  manifest TEXT, body TEXT NOT NULL, grade TEXT, graded_at TEXT);
 CREATE TABLE IF NOT EXISTS game_stats (           -- same metrics as set_stats, per game, with the character played in that game
   set_key TEXT REFERENCES sets ON DELETE CASCADE, replay_id TEXT, player_id INTEGER, character TEXT, metric TEXT, value REAL,
   PRIMARY KEY (replay_id, player_id, metric));
@@ -293,6 +304,87 @@ def ingest_set(con, outdir, meta):
     return k
 
 
+def _ids_key(ids):
+    return ','.join(sorted(i.strip().upper() for i in ids if i.strip()))
+
+
+def store_prediction(con, pred, replace=False):
+    """Store a blind prediction before any of its games are ingested. pred needs 'replays' (list of replay IDs) and
+    'written_at'; 'manifest' (blind_manifest.py output) is kept if present. Returns the prediction_id."""
+    ids = pred.get('replays') or []
+    if isinstance(ids, str): ids = ids.replace(',', ' ').split()
+    if not ids: raise SystemExit("prediction needs 'replays': the set's replay IDs")
+    if not pred.get('written_at'): raise SystemExit("prediction needs 'written_at'")
+    key = _ids_key(ids)
+    seen = [r[0] for r in con.execute(f"SELECT replay_id FROM games WHERE replay_id IN ({','.join('?' * len(ids))})", [i.upper() for i in ids])]
+    if seen:
+        raise SystemExit(f"refused: {', '.join(seen)} already ingested, so the result is known. Store predictions before the analyzer runs.")
+    old = con.execute('SELECT prediction_id, set_key FROM predictions WHERE replay_ids=?', (key,)).fetchone()
+    if old and not replace:
+        raise SystemExit(f'a prediction for these replays is already stored (id {old[0]}); --replace to overwrite it before ingest')
+    if old: con.execute('DELETE FROM predictions WHERE prediction_id=?', (old[0],))
+    cur = con.execute('INSERT INTO predictions (replay_ids, written_at, stored_at, manifest, body) VALUES (?,?,?,?,?)',
+                      (key, pred['written_at'], datetime.datetime.now().isoformat(timespec='seconds'),
+                       json.dumps(pred.get('manifest')) if pred.get('manifest') is not None else None, json.dumps(pred)))
+    con.commit()
+    return cur.lastrowid
+
+
+def link_prediction(con, set_key, meta):
+    """After ingest: attach the stored prediction to its set and record the grade from review_docs.prediction."""
+    ids = [r[0] for r in con.execute('SELECT replay_id FROM games WHERE set_key=?', (set_key,))]
+    row = con.execute('SELECT prediction_id FROM predictions WHERE replay_ids=?', (_ids_key(ids),)).fetchone()
+    if not row:
+        print('note: no stored blind prediction for this set (sf6db.py predict stores one before the analyzer runs)')
+        return None
+    grade = (meta.get('review_docs') or {}).get('prediction')
+    con.execute('UPDATE predictions SET set_key=?, grade=COALESCE(?, grade), graded_at=CASE WHEN ? IS NULL THEN graded_at ELSE ? END WHERE prediction_id=?',
+                (set_key, json.dumps(grade) if grade else None, json.dumps(grade) if grade else None,
+                 datetime.datetime.now().isoformat(timespec='seconds'), row[0]))
+    con.commit()
+    return row[0]
+
+
+def _pid(con, who):
+    if not who: return None
+    r = con.execute('SELECT player_id FROM players WHERE cfn_id=? OR name=? UNION SELECT player_id FROM player_names WHERE name=?', (who, who, who)).fetchone()
+    return r[0] if r else None
+
+
+def history(con, opp=None, opp_char=None, player='.shog', my_char=None, before=None, exclude=()):
+    """Pre-set history for a prediction, only from sets before `before` (ISO date or datetime; default now).
+    A set counts as earlier if played_date is before the date, or on the same date and ingested before the time."""
+    before = before or datetime.datetime.now().isoformat(timespec='seconds')
+    day, tm = before[:10], (before[11:] if len(before) > 10 else None)
+    ex = set(i.upper() for i in exclude)
+    def earlier(sk, date, ing):
+        if ex and any(r[0] in ex for r in con.execute('SELECT replay_id FROM games WHERE set_key=?', (sk,))): return False
+        if date < day: return True
+        return date == day and tm is not None and (ing or '') [:19] <= before[:19]
+    me, op = _pid(con, player), _pid(con, opp)
+    sets = [r for r in con.execute('SELECT set_key, played_date, ingested_at, format, ranked, focus_player_id, opp_player_id, focus_char, opp_char, '
+                                   'focus_games, opp_games, winner_player_id FROM sets ORDER BY played_date') if earlier(r[0], r[1], r[2])]
+    out = {'before': before, 'vs_player': [], 'char_matchup': [], 'opp_reads': [], 'opp_habits': [], 'my_recent_habits': []}
+    name = lambda p: (con.execute('SELECT name FROM players WHERE player_id=?', (p,)).fetchone() or ['?'])[0]
+    for sk, d, _, fmt, rk, f, o, fc, oc, fg, og, w in sets:
+        pids = {f: fc, o: oc}
+        row = dict(set_key=sk, date=d, format=fmt, ranked=rk, players=f'{name(f)} ({fc}) {fg}-{og} {name(o)} ({oc})', winner=name(w) if w else None)
+        if op and op in pids: out['vs_player'].append(row)
+        other = o if f == me else f
+        if me in pids and opp_char and pids[me] == (my_char or pids[me]) and pids.get(other) == opp_char and other != me:
+            out['char_matchup'].append(row)
+        if op in pids:
+            for r in con.execute('SELECT archetype, lean, confidence, evidence FROM reads WHERE set_key=? AND player_id=?', (sk, op)):
+                out['opp_reads'].append(dict(set_key=sk, date=d, archetype=r[0], lean=r[1], confidence=r[2], evidence=r[3]))
+            for r in con.execute('SELECT kind, area, habit, times FROM habits WHERE set_key=? AND player_id=?', (sk, op)):
+                out['opp_habits'].append(dict(set_key=sk, kind=r[0], area=r[1], habit=r[2], times=r[3]))
+    mine = [s for s in sets if me in (s[5], s[6])][-5:]
+    for s in mine:
+        for r in con.execute("SELECT kind, area, habit, times FROM habits WHERE set_key=? AND player_id=? AND kind IN ('Leak','Strength')", (s[0], me)):
+            out['my_recent_habits'].append(dict(set_key=s[0], date=s[1], kind=r[0], area=r[1], habit=r[2], times=r[3]))
+    return out
+
+
 def load_info(path):
     """Just the capture's info block (plain or .gz)."""
     if path.endswith('.gz'):
@@ -308,10 +400,20 @@ if __name__ == '__main__':
         meta = json.load(open(sys.argv[4]))
         key = ingest_set(con, sys.argv[3], meta)
         print('ingested', key)
+        link_prediction(con, key, meta)
         con.commit(); con.close()
         if '--no-spectra' not in sys.argv:   # the eight player spectra (spectra table + review_docs archetypes)
             import spectra_backfill
             spectra_backfill.backfill(db, [key], local=meta.get('captures_local'))
+    elif cmd == 'predict':
+        pid = store_prediction(con, json.load(open(sys.argv[3], encoding='utf-8')), replace='--replace' in sys.argv)
+        print('stored prediction', pid)
+    elif cmd == 'history':
+        a = sys.argv[3:]
+        opt = lambda k: a[a.index(k) + 1] if k in a else None
+        h = history(con, opt('--opp'), opt('--opp-char'), opt('--player') or '.shog', opt('--my-char'), opt('--before'),
+                    (opt('--exclude') or '').replace(',', ' ').split())
+        print(json.dumps(h, indent=1, ensure_ascii=False))
     elif cmd == 'sql':
         cur = con.execute(sys.argv[3]); print(' | '.join(d[0] for d in cur.description))
         for r in cur.fetchall(): print(' | '.join('' if v is None else str(v) for v in r))

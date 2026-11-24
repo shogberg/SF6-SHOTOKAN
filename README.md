@@ -50,6 +50,7 @@ Replay reviews for Street Fighter 6. Claude reads each game's REFramework captur
   - compare players with each other (`tools/decision_presses.py`: where they press, with which buttons, and what it leads to);
   - make predictions before a set;
   - score player spectra against everyone reviewed so far.
+- **Blind predictions:** `tools/blind_manifest.py` gives the pre-set facts without anything that leaks the result (round results, later games' MR, the number of games); `sf6db.py history` gathers history only from sets before the one predicted; `sf6db.py predict` stores the prediction before the analyzer runs, refuses once the set is ingested, and ingest links and grades it (`predictions` table).
 - `sf6db.py ingest` also computes the set's eight spectra and adds its replays to the behaviour cache first (`--no-spectra` skips it). `tools/spectra_backfill.py` fills sets that have none.
 - When the analyzer's counting changes, `tools/rescore_damage.py` re-scores damage in an existing database from the captures without re-ingesting, and `lethal_backfill.py` / `game_stats_backfill.py` apply older rule changes.
 
@@ -199,6 +200,7 @@ When a player has history in the database, the dashboard compares this set with 
 | `tools/analyze_capture.py` | Turns REFramework capture files into review datasets (hits, events, parries, resources, timings). |
 | `tools/sf6db.py`, `rank.py`, `spectra.py`, `behavior.py`, `beh_cache.py` | The history database (SQLite) and the player spectra and behaviour stats. |
 | `tools/spectra_backfill.py`, `rescore_damage.py`, `lethal_backfill.py`, `game_stats_backfill.py` | Bring an existing database up to date after a rule change: spectra, damage (white health), lethal burnouts, per-game stats. |
+| `tools/blind_manifest.py` | Pre-set facts for a blind prediction (first game's header only). |
 | `tools/decision_presses.py` | Compare players' decision presses: per round by situation, outcome rates, top moves per situation. |
 | `tools/quick_dashboard_from_db.py`, `overview_from_db.py`, `profiles_from_db.py`, `sf6db_export.py`, `ranked_build.py` | Build dashboard datasets, overviews and player profiles from the database. |
 | `tools/standalone.py`, `standalone_head.html`, `standalone_shim.js`, `summary_md.py`, `check_page.py` | Offline HTML copies of dashboards, summaries and page checks. |
