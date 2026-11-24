@@ -2,6 +2,12 @@
 
 Notable changes to the SHOTOKAN review tooling and skills, newest first. Every push adds its changes here.
 
+## 2026-11-24 (spectra pool)
+- Spectra are scored against everyone except the configured player. New `tools/spectra_calibrate.py DB [--min-games 10] [--dry]`: the 20/40/60/80th percentile cut points come from every player-set except the configured player's, each other player weighted equally (min(1, games/10), so players with under 10 games count less), stored in sf6.db (settings `spectra_cuts`); every set is re-scored. `spectra.py` loads them (`load_cuts`) and keeps each score's raw value; `spectra_backfill.py` stores raw values in a new `spectra_raw` table. Run on sf6.db: pool 234 player-sets from 122 players (effective weight 47), 90 of .shog's and 447 other scores moved. .shog's mean Risk tolerance is now 3.7 (everyone else 2.9) and Temperament (offense) 2.8 (3.2).
+- New `tools/player_baseline.py DB [--days 7]`: the configured player's set against the median of their own sets in the previous 7 days (spectra raw values with the change on the 1-5 scale, and per-game stats), in a new `player_baseline` table. `shared_core_db.py ingest` runs it.
+- New `tools/character_baselines.py DB [--include-player]`: per-character baselines without the configured player, for sf6-character-notes (updated: Cammy now 2.1 forward jumps, 1.9 Drive Rush, 1.5 Drive Parry a round without .shog; his own 2.5, 2.5, 1.1).
+- sf6-character-notes: Marisa section (Gladius armor loses to lows in every version, Scutum's counter-throw against Hooligan > Silent Step, plus-frame charged normals).
+
 ## 2026-11-24 (tiers)
 - quick-review-report loads `sf6-character-notes` (character baselines before calling a rate a habit or leak); `sf6-coach-shog` and the other guideline skills load only in full-review-report. TODO: decide whether sf6-coach-shog belongs in Quick.
 - Reviews run in tiers: `sf6-replay-analysis` is now a short entry point that loads `shared-core-review` (every review: setup, played order, blind prediction, analyzer, storage, ingest, grading, wording rules), then `quick-review-report` (generated reads and habits, numbers, lessons held, the Quick reply), then for Full and Tournament reviews `full-review-report` (guideline skills, frame data, video checks, chess or poker, review_docs, the Full reply, Tournament). A Full review starts from the Quick draft. Content moved, not dropped; the stale Quick step (`ranked_build.py` / `ranked_overview.py` cards) is gone.

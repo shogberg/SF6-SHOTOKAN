@@ -51,7 +51,7 @@ Replay reviews for Street Fighter 6. Claude reads each game's REFramework captur
   - make predictions before a set;
   - score player spectra against everyone reviewed so far.
 - **Blind predictions:** `tools/shared_core_blind_manifest.py` gives the pre-set facts without anything that leaks the result (round results, later games' MR, the number of games); `shared_core_db.py history` gathers history only from sets before the one predicted; `shared_core_db.py predict` stores the prediction before the analyzer runs, refuses once the set is ingested, and ingest links and grades it (`predictions` table).
-- `shared_core_db.py ingest` also computes the set's eight spectra and adds its replays to the behaviour cache first (`--no-spectra` skips it). `tools/spectra_backfill.py` fills sets that have none.
+- `shared_core_db.py ingest` also computes the set's eight spectra and adds its replays to the behaviour cache first (`--no-spectra` skips it). `tools/spectra_backfill.py` fills sets that have none. Spectra are scored against everyone except you: `tools/spectra_calibrate.py DB` recalibrates the cut points from every other player (each weighted equally, less below 10 games) and re-scores all sets; `tools/player_baseline.py` (run by ingest) compares each of your sets with your own previous 7 days; `tools/character_baselines.py DB` prints the per-character baselines without you.
 - When the analyzer's counting changes, `tools/rescore_damage.py` re-scores damage in an existing database from the captures without re-ingesting, `lethal_backfill.py` / `game_stats_backfill.py` apply older rule changes, and `relabel_moves.py DB OLD_ANALYZER.py MOVES_DIR` brings stored move labels up to date after the analyzer learns new move names (it compares the old and new analyzer on each character's move export); `relabel_resolve.py` settles the labels it reports as ambiguous from the captures.
 
 ### Review levels
@@ -199,6 +199,9 @@ When a player has history in the database, the dashboard compares this set with 
 |---|---|
 | `tools/shared_core_analyze.py` | Turns REFramework capture files into review datasets (hits, events, parries, resources, timings). |
 | `tools/shared_core_db.py`, `rank.py`, `spectra.py`, `behavior.py`, `beh_cache.py` | The history database (SQLite) and the player spectra and behaviour stats. |
+| `tools/spectra_calibrate.py` | Recalibrate the spectra cut points from every player except you (each weighted equally, less below 10 games), store them in sf6.db and re-score every set. |
+| `tools/player_baseline.py` | Your set against your own previous 7 days (`player_baseline` table); ingest runs it. |
+| `tools/character_baselines.py` | Per-character baselines (jumps, Drive Rush, Drive Parry, throws per round) without you, for sf6-character-notes. |
 | `tools/spectra_backfill.py`, `rescore_damage.py`, `lethal_backfill.py`, `game_stats_backfill.py`, `relabel_moves.py`, `relabel_resolve.py` | Bring an existing database up to date after a rule change: spectra, damage (white health), lethal burnouts, per-game stats, move names. |
 | `tools/shared_core_blind_manifest.py` | Pre-set facts for a blind prediction (first game's header only). |
 | `tools/full_review_decision_presses.py` | Compare players' decision presses: per round by situation, outcome rates, top moves per situation. |
