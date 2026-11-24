@@ -2,6 +2,14 @@
 
 Notable changes to the SHOTOKAN review tooling and skills, newest first. Every push adds its changes here.
 
+## 2026-11-24 (evening)
+- Luke's moves are named: Flash Knuckle L / M / H / OD (`HADOSHO` / `MOROTE_M` / `MOROTE_H` / `FLASHKNUCKLE_EX`, read from the order in his move export; `HADOSHO` used to read as Rising Uppercut), Avenger > Impaler and Avenger > No Chaser, SA1 Vulcan Blast, SA2 Eraser, SA3 Pale Rider and the Critical Art (they showed as `MOROTE_M`, `Super HADOUKEN`, `Super Ereser` and so on).
+- Fix: `relabel_moves.py` only compared labels that changed, so an old label that partly stayed the same ("Rising Uppercut" covered both the real Rising Uppercut and `HADOSHO`) was swapped everywhere. It now counts unchanged raw names too and leaves such labels alone (reported). Bison, Cammy and Ken relabels checked: not affected.
+- New `tools/relabel_resolve.py DB TOOLS_DIR REPLAYS_DIR CHAR "label|label" SETKEY ...`: resolves the labels `relabel_moves.py` leaves ambiguous, row by row, by re-running the analyzer on the set's captures and matching hits (game, round, timer, damage, hits) and timings; replaces that character's usage rows per game.
+- Run on sf6.db: 12 Luke hits relabelled, 2 ambiguous hits resolved in older sets (one Flash Knuckle, one Avenger > Impaler); the Solid set was re-analyzed and re-ingested with its reads and habits.
+- Fix: Quick reviews got no player reads or habits once the quick-dashboard step was retired, because `quick_dashboard_from_db.py --write-reads` only covered sets numbered on that dashboard. New `--set SET_KEY` (repeatable) builds and writes just those sets, on a dashboard or not, using the set's own focus player. sf6-replay-analysis now runs it with `--set`.
+- sf6-replay-analysis: review games in the order played, not recorded, unless told otherwise; the order comes from the Buckler battle log's `uploaded_at` (IDs and times only, read before the prediction), and `game_times` goes in META.
+
 ## 2026-11-24 (later)
 - M. Bison's moves are named: Scissor Kicks (Double Knee Press; L, M/H and OD), Shadow Rise and its follow-ups (Head Press, Somersault Skull Diver, Devil Reverse), Backfist Combo, Psycho Crusher Attack, Bison Warp, Psycho Mine explosion, his 5MP target combos, SA1 Knee Press Nightmare, SA2 Psycho Punisher, SA3 Unlimited Psycho Crusher and the Critical Art. His supers now count in the Risk tolerance spectrum.
 - Cammy's Hooligan Combination and its follow-ups are named (Razor's Edge Slicer, Fatal Leg Twister, Reverse Edge, Silent Step), plus Lift Combination (4MP~HK) and her 5HP~HK target combo. They used to show as FC_*, RAZEREDGE, REVEDGE and so on.

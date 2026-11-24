@@ -52,7 +52,7 @@ Replay reviews for Street Fighter 6. Claude reads each game's REFramework captur
   - score player spectra against everyone reviewed so far.
 - **Blind predictions:** `tools/blind_manifest.py` gives the pre-set facts without anything that leaks the result (round results, later games' MR, the number of games); `sf6db.py history` gathers history only from sets before the one predicted; `sf6db.py predict` stores the prediction before the analyzer runs, refuses once the set is ingested, and ingest links and grades it (`predictions` table).
 - `sf6db.py ingest` also computes the set's eight spectra and adds its replays to the behaviour cache first (`--no-spectra` skips it). `tools/spectra_backfill.py` fills sets that have none.
-- When the analyzer's counting changes, `tools/rescore_damage.py` re-scores damage in an existing database from the captures without re-ingesting, `lethal_backfill.py` / `game_stats_backfill.py` apply older rule changes, and `relabel_moves.py DB OLD_ANALYZER.py MOVES_DIR` brings stored move labels up to date after the analyzer learns new move names (it compares the old and new analyzer on each character's move export).
+- When the analyzer's counting changes, `tools/rescore_damage.py` re-scores damage in an existing database from the captures without re-ingesting, `lethal_backfill.py` / `game_stats_backfill.py` apply older rule changes, and `relabel_moves.py DB OLD_ANALYZER.py MOVES_DIR` brings stored move labels up to date after the analyzer learns new move names (it compares the old and new analyzer on each character's move export); `relabel_resolve.py` settles the labels it reports as ambiguous from the captures.
 
 ### Review levels
 | Level | What you get |
@@ -199,7 +199,7 @@ When a player has history in the database, the dashboard compares this set with 
 |---|---|
 | `tools/analyze_capture.py` | Turns REFramework capture files into review datasets (hits, events, parries, resources, timings). |
 | `tools/sf6db.py`, `rank.py`, `spectra.py`, `behavior.py`, `beh_cache.py` | The history database (SQLite) and the player spectra and behaviour stats. |
-| `tools/spectra_backfill.py`, `rescore_damage.py`, `lethal_backfill.py`, `game_stats_backfill.py`, `relabel_moves.py` | Bring an existing database up to date after a rule change: spectra, damage (white health), lethal burnouts, per-game stats, move names. |
+| `tools/spectra_backfill.py`, `rescore_damage.py`, `lethal_backfill.py`, `game_stats_backfill.py`, `relabel_moves.py`, `relabel_resolve.py` | Bring an existing database up to date after a rule change: spectra, damage (white health), lethal burnouts, per-game stats, move names. |
 | `tools/blind_manifest.py` | Pre-set facts for a blind prediction (first game's header only). |
 | `tools/decision_presses.py` | Compare players' decision presses: per round by situation, outcome rates, top moves per situation. |
 | `tools/quick_dashboard_from_db.py`, `overview_from_db.py`, `profiles_from_db.py`, `sf6db_export.py`, `ranked_build.py` | Build dashboard datasets, overviews and player profiles from the database. The quick-dashboard they fed is retired ([archive](docs/archive/quick-dashboard.md)); `quick_dashboard_from_db.py --write-reads` is still run after a Quick review to write its reads and habits to the database. |
