@@ -2,6 +2,12 @@
 
 Notable changes to the SHOTOKAN review tooling and skills, newest first. Every push adds its changes here.
 
+## 2026-11-25 (move names, same-day history)
+- Move names for Akuma, Sagat and Ingrid in `shared_core_analyze.py`, checked against SuperCombo: Akuma's Gou Shoryuken (was labelled "Rising Uppercut"), Gou Hadoken, Zanku Hadoken, Adamant Flame, Demon Raid and its follow-ups, Tatsumaki Zanku-Kyaku, Ashura Senku / Oboro Throw, his supers and the alternate Critical Art Shun Goku Satsu (Raging Demon); Sagat's Low / High Tiger Shot, Tiger Uppercut, Tiger Knee Crush, Tiger Nexus, SA1-SA3 and target combos; Ingrid's Sun Shot, Sun Rise, Sun Flare / Solar Burst, Vanishing Sun, SA1-SA3 and target combos. Ingrid's `22P_DAGEKI` / `22P_Tama` are read as Sun Veil (her counter) catching a strike / projectile: inferred, the wiki lists no 22P. A few guesses are marked in the code comments.
+- `frame_data`: block-advantage aliases for Adamant Flame, Tatsumaki Zanku-Kyaku, Tiger Knee Crush, Tiger Nexus, Sun Rise, Sun Shot, Sun Flare and Juri's Tensenrin.
+- `shared_core_db.py history`: same-day sets now count as earlier by their first game's played time (to the minute), not their ingest time; `--before` accepts a `T` or a space; same-day sets are sorted in played order, so the recent-habits list picks the right sets. Before this, earlier sets from the same day were always left out of a prediction's history.
+- `quick_review_reads.py`: Akuma's anti-air wording says Gou Shoryuken.
+
 ## 2026-11-25 (tracker retired)
 - The SF6 Replay Tracker sheet and its dashboard are retired: the SHOTOKAN site is the long-term view of sf6.db. shared-core-review no longer refreshes the sheet after ingest, `skills/shared-core-review/references/shared-core-tracking.md` is removed, and sf6-replay-analysis / full-review-report no longer mention the tracker. `sf6db_export.py` stays (overview_from_db.py imports it).
 
