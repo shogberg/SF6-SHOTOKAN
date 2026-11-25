@@ -2,6 +2,9 @@
 
 Notable changes to the SHOTOKAN review tooling and skills, newest first. Every push adds its changes here.
 
+## 2026-11-25 (tracker retired)
+- The SF6 Replay Tracker sheet and its dashboard are retired: the SHOTOKAN site is the long-term view of sf6.db. shared-core-review no longer refreshes the sheet after ingest, `skills/shared-core-review/references/shared-core-tracking.md` is removed, and sf6-replay-analysis / full-review-report no longer mention the tracker. `sf6db_export.py` stays (overview_from_db.py imports it).
+
 ## 2026-11-24 (punish windows)
 - New block punish check in `shared_core_analyze.py`: every time a player leaves blockstun while the attacker is still recovering by 5+ frames (measured from the capture), with distance and range (close <= 1.6, mid <= 2.6, far; `PUNISH_CLOSE` / `PUNISH_MID`), and what the defender did (punished, pressed but didn't connect, Drive Parry, jumped, dashed, held / walked). Moves restarted or cancelled during the blockstun are frame traps and skipped. Written to `punish_windows.json` and a "Block punish windows" section in report.md.
 - New `tools/frame_data/<char>.json` for 32 characters: SuperCombo wiki Block Adv by input (pulled 2026-11-24), plus `aliases` from analyzer labels to inputs for specials (Ryu, Ken, Akuma, Guile, Sagat, Cammy so far; `?` takes L/M/H from the label, OD doubles the button). Each window is checked: `ok`, `later hit blocked` (multi-hit moves measure less minus than the wiki's first-hit value; still a real window), `wiki disagrees` (left out of counts) or `unverified`.

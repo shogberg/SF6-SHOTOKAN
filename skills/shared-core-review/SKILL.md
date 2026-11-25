@@ -52,8 +52,8 @@ Work on a `$HOME` copy of sf6.db (SQLite on the device mount fails), then copy i
 - **Add every reviewed set**, including sets where neither player is .shog.
 - An incomplete set (e.g. a ranked FT2 left at 1-1) stays 1-1 with no winner and no prediction grade.
 - Grade the prediction (predicted vs actual, path, what happened, lessons) and store it in `review_docs.prediction`.
-- **After every ingest, refresh the long-term views:** run `tools\sf6db_export.py DB OUTDIR` and rewrite the Replay Tracker sheet's Set Metrics, Player Reads, Opponents and Character Matchups tabs from its output, then re-upload those tabs to the tracker dashboard. The tracker is the Claude Sheet **SF6 Replay Tracker** (https://claude.ai/artifact/Ac9SUUDdfjKB6J1j3u5Qxm, slug 4dca7b11-3cc8-4c1d-92e8-ab740b23a77e); what goes in each tab and the dashboard refresh: `shared-core-tracking.md`.
-- sf6.db also has the views `v_sets`, `v_player_matchups` (me vs an opponent) and `v_char_matchups` (my character vs theirs); the tracker sheet and the site are views of it.
+- The long-term views are the SHOTOKAN site, published from sf6.db (no tracker sheet; retired 2026-11-25).
+- sf6.db also has the views `v_sets`, `v_player_matchups` (me vs an opponent) and `v_char_matchups` (my character vs theirs); the site is a view of it.
 
 ## 7. Rules every review follows
 - **Timestamps:** round + `round_timer`, written "@" (G1 R2 @77).
@@ -64,6 +64,6 @@ Work on a `$HOME` copy of sf6.db (SQLite on the device mount fails), then copy i
 - **Burnouts:** a burnout spent on a combo that kills (lethal) isn't counted.
 - **OD specials:** the analyzer marks a special OD when its start drains at least 15,000 Drive within 12 frames. Trust the OD label over the strength label.
 - **Confidence:** never make up inputs or frame values; mark what the data can't prove "likely" or "unclear", and ask Sean what he was going for when it matters.
-- **Reviewing another player** (e.g. "Sayo, playing Ryu"): analyze from that player's side, keep it out of Sean's tracker, confirm which in-game name is theirs, and deliver what Sean asks for.
+- **Reviewing another player** (e.g. "Sayo, playing Ryu"): analyze from that player's side, keep it out of Sean's own stats, confirm which in-game name is theirs, and deliver what Sean asks for.
 
 Then continue with `quick-review-report`.

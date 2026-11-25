@@ -1,6 +1,6 @@
 ---
 name: "sf6-replay-analysis"
-description: "Analyze Street Fighter 6 replays from REFramework capture files (when present) and recordings (video or screenshots): read the frame meter and HUD, log key moments by round and round timer, check against SuperCombo frame data, report both players' habits and fixes, and log Sean's replays to his SF6 Replay Tracker sheet."
+description: "Analyze Street Fighter 6 replays from REFramework capture files (when present) and recordings (video or screenshots): read the frame meter and HUD, log key moments by round and round timer, check against SuperCombo frame data, report both players' habits and fixes, and add every reviewed set to sf6.db (shown on the SHOTOKAN site)."
 ---
 
 # SF6 replay analysis
