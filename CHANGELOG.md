@@ -2,6 +2,13 @@
 
 Notable changes to the SHOTOKAN review tooling and skills, newest first. Every push adds its changes here.
 
+## 2026-11-26 (notable players, excluded sets)
+- `shared_core_db.py`:
+    - New `player_flags` table and `flag` / `flags` commands, to mark notable / pro players (default flag `notable`).
+    - New `sets.excluded` and an `exclude` command: a set stays in the database but is left out of `history` (prediction history) and the published site. META `excluded` sets it at ingest, and it's kept on re-ingest.
+- shared-core-review: a set whose rounds open with about 30 s of warm-up is a 1v1me betting match. Ask before reviewing it, and ingest it with `excluded: "1v1me"`.
+- README: the database extras and the fireball Drive Rush tool. TODO: apply `excluded` in the remaining tools.
+
 ## 2026-11-26 (reviewed date)
 - `shared_core_db.py`: new `sets.reviewed_at`, the time a set was first reviewed. It's set on the first ingest and kept on re-ingest (unlike `ingested_at`), or taken from META `reviewed_at`. Existing databases are backfilled from `ingested_at` (else 2026-11-26) when they're opened. SHOTOKAN Web sorts its latest reviewed sets by it.
 - TODO: MR-range trends now on the site's Stats by MR page; prediction numbers refreshed; A.K.I., Jamie, Alex and Elena move names done.

@@ -29,6 +29,7 @@ Ideas and planned work for SHOTOKAN (the replay-review tooling and skills). Newe
 - [ ] Predictions: start from the MR gap and grade each key factor as data (as of 2026-11-26 blind winner picks are 74% of 182 sets, against 67% for the higher-MR player where both MRs are known; Low-confidence picks 61%).
 - [ ] Name the internal moves still shown as IDs for Zangief, Marisa, Ingrid and Yasmine; confirm Arjun's Divine Pillar (`03`) and Cruel Shoulder (`623P`) names. (Done 2026-11-26 from the wiki and capture inputs: A.K.I., Jamie, Alex, Elena.)
 - [ ] Measure conditioning: how players condition each other over a set.
+- [ ] Respect `sets.excluded` (1v1me betting matches) in the other tools that read the sets table: quick_review_reads, character_baselines, spectra_calibrate, full_review_fireball_drive_rush, sf6db_export. `shared_core_db.py history` and SHOTOKAN Web's publish already leave excluded sets out (2026-11-26).
 - [ ] Winner weighting for the Economy of Buttons.
 - [ ] Correct the hand-written burnout counts in older review docs (cadii, Grozznuy) for the lethal-burnout rule.
 - [ ] Stick-figure viewer: character looks for characters beyond Cammy and Akuma.

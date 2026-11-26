@@ -52,6 +52,11 @@ Replay reviews for Street Fighter 6. Claude reads each game's REFramework captur
   - score player spectra against everyone reviewed so far.
 - **Blind predictions:** `tools/shared_core_blind_manifest.py` gives the pre-set facts without anything that leaks the result (round results, later games' MR, the number of games); `shared_core_db.py history` gathers history only from sets before the one predicted; `shared_core_db.py predict` stores the prediction before the analyzer runs, refuses once the set is ingested, and ingest links and grades it (`predictions` table).
 - `shared_core_db.py ingest` also computes the set's eight spectra and adds its replays to the behaviour cache first (`--no-spectra` skips it). `tools/spectra_backfill.py` fills sets that have none. Spectra are scored against everyone except you: `tools/spectra_calibrate.py DB` recalibrates the cut points from every other player (each weighted equally, less below 10 games) and re-scores all sets; `tools/player_baseline.py` (run by ingest) compares each of your sets with your own previous 7 days; `tools/character_baselines.py DB` prints the per-character baselines without you.
+- **Review date, notable players, excluded sets** (2026-11-26):
+  - `sets.reviewed_at` is when a set was first reviewed, kept on re-ingest; SHOTOKAN Web sorts its latest sets by it.
+  - `shared_core_db.py flag DB NAME|CFN [FLAG] [--note ...] [--remove]` marks a notable / pro player (`player_flags`, default flag `notable`); `flags DB` lists them.
+  - `shared_core_db.py exclude DB SETKEY [REASON] [--remove]` keeps a set in the database but leaves it out of prediction history and the published site (reason `1v1me` for betting matches that open with a ~30 s warm-up). META `excluded` does the same at ingest.
+- `tools/full_review_fireball_drive_rush.py DB --player NAME --ranked-only` measures fireball Drive Rush per character and player: damage either way in the next 30 frames, Drive cost, the mixup after a blocked button, and round win rates, with raw Drive Rush for comparison.
 - When the analyzer's counting changes, `tools/rescore_damage.py` re-scores damage in an existing database from the captures without re-ingesting, `lethal_backfill.py` / `game_stats_backfill.py` apply older rule changes, and `relabel_moves.py DB OLD_ANALYZER.py MOVES_DIR` brings stored move labels up to date after the analyzer learns new move names (it compares the old and new analyzer on each character's move export); `relabel_resolve.py` settles the labels it reports as ambiguous from the captures.
 
 ### Review levels
@@ -198,13 +203,14 @@ When a player has history in the database, the dashboard compares this set with 
 | Path | What it is |
 |---|---|
 | `tools/shared_core_analyze.py` | Turns REFramework capture files into review datasets (hits, events, parries, resources, timings). |
-| `tools/shared_core_db.py`, `rank.py`, `spectra.py`, `behavior.py`, `beh_cache.py` | The history database (SQLite) and the player spectra and behaviour stats. |
+| `tools/shared_core_db.py`, `rank.py`, `spectra.py`, `behavior.py`, `beh_cache.py` | The history database (SQLite) and the player spectra and behaviour stats. `shared_core_db.py` commands: `ingest`, `predict`, `history`, `mr`, `odds`, `flag` / `flags` (notable players), `exclude` (sets left out of stats), `sql`. |
 | `tools/spectra_calibrate.py` | Recalibrate the spectra cut points from every player except you (each weighted equally, less below 10 games), store them in sf6.db and re-score every set. |
 | `tools/player_baseline.py` | Your set against your own previous 7 days (`player_baseline` table); ingest runs it. |
 | `tools/character_baselines.py` | Per-character baselines (jumps, Drive Rush, Drive Parry, throws per round) without you, for sf6-character-notes. |
 | `tools/spectra_backfill.py`, `rescore_damage.py`, `lethal_backfill.py`, `game_stats_backfill.py`, `relabel_moves.py`, `relabel_resolve.py` | Bring an existing database up to date after a rule change: spectra, damage (white health), lethal burnouts, per-game stats, move names. |
 | `tools/shared_core_blind_manifest.py` | Pre-set facts for a blind prediction (first game's header only). |
 | `tools/full_review_decision_presses.py` | Compare players' decision presses: per round by situation, outcome rates, top moves per situation. |
+| `tools/full_review_fireball_drive_rush.py` | Fireball Drive Rush value per character and player (damage both ways, Drive cost, mixup after a blocked button, round win rates). |
 | `tools/quick_review_reads.py`, `overview_from_db.py`, `profiles_from_db.py`, `sf6db_export.py`, `ranked_build.py` | Build dashboard datasets, overviews and player profiles from the database. The quick-dashboard they fed is retired ([archive](docs/archive/quick-dashboard.md)); `quick_review_reads.py --write-reads` is still run after a Quick review to write its reads and habits to the database. |
 | `tools/standalone.py`, `standalone_head.html`, `standalone_shim.js`, `summary_md.py`, `check_page.py` | Offline HTML copies of dashboards, summaries and page checks. |
 | `tools/drive_contact.py`, `drive_measure.py` | Drive gauge measurement helpers. |
