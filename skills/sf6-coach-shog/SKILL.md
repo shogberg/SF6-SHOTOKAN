@@ -33,6 +33,7 @@ Don't tell .shog to "tech more" by default. Taking a throw (~1200) is often the 
 - **What can't be reacted to:**
   - The offensive player can't react to a wake-up invincible reversal; it has to be a read (bait it, or block).
   - The defensive player can't react to most meaty buttons or throws with a wake-up reversal; it has to be a read too.
+  - **Jumping out of a throw is a read, never a reaction (.shog, 2026-11-27).** A jump held on wake-up always beats a meaty throw, but there isn't time to see a throw coming and jump. When an attacker's throw loop rarely gets jumped, look at what the jump cost the defender (did a meaty strike or an anti-air catch it?), not at the throw's timing.
   - There are very specific situations where a wake-up super can be reacted to. .shog will define these later; until then, treat wake-up supers as reads.
   - **Against a reversal, a shimmy back and blocking at point blank are the same option.** The defender can't react to the difference, so both cover the reversal the same way. In a review, judge the choice between covering the reversal and going for a strike or throw, not how the cover was done (stepping back vs standing still).
 

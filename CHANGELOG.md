@@ -2,6 +2,9 @@
 
 Notable changes to the SHOTOKAN review tooling and skills, newest first. Every push adds its changes here.
 
+## 2026-11-27 (jumping out of a throw)
+- sf6-coach-shog: jumping out of a throw is a read, never a reaction. A held wake-up jump always beats a meaty throw; when a throw loop rarely gets jumped, look at what the jump cost the defender, not at the throw's timing.
+
 ## 2026-11-27 (skills synced)
 - sf6-character-notes: A.K.I. has only light (52f) and OD (44f) fireballs, so light / heavy fireball rules don't apply; Sinister Slide follow-ups named (Venomous Fang = fireball skip, Heel Strike = kicks, Entrapment = command grab, stance cancel) and a rule to name the ending whenever a review suggests it.
 - sf6-fgc-glossary: Homura (Japanese players' name for Mai's SA1 flame stocks).
