@@ -2,6 +2,13 @@
 
 Notable changes to the SHOTOKAN review tooling and skills, newest first. Every push adds its changes here.
 
+## 2026-11-27 (jump-ins and anti-air rate)
+- New analyzer step `shared_core_antiair.py`: every forward or neutral jump at the opponent, ended as anti-air, air-to-air, trade, parried, landing punished, hit, blocked (with whether the defender was opened up within 2 s) or empty, and whether the defender was **free** to anti-air it (walking, standing or crouching between a 12-frame reaction and 5 frames before it arrived) or **busy** (own move or recovery, blockstun, hitstun, knockdown). Anti-air rate = anti-aired / jump-ins they were free for; jump-ins taken while busy aren't failures. Writes `jump_ins.json` and a "Jump-ins" section in report.md.
+- `shared_core_db.py`: new `jump_ins` table; `defense_metrics()` puts the whiff-punish and jump-in totals into set_stats / game_stats (`jump_ins_free`, `jump_ins_anti_aired`, `jump_ins_stopped`, `jump_ins_hit`, `jump_ins_blocked`, `jump_ins_busy`, ...).
+- New `defense_backfill.py DB [--set KEY]`: fills whiff punishes and jump-ins for sets already in the database from their captures, without re-ingesting.
+- quick-review-report: jump-ins and the anti-air rate among the numbers to pull.
+- `shared_core_whiffs.py`: a whiff-punish chance is now strict (15+ frames, punisher free, in reach) even when the whiff was punished, so whiff_punishes / whiff_chances is a real rate; punishes outside a chance keep their reason and are still listed in report.md.
+
 ## 2026-11-27 (whiff punishes)
 - New analyzer step `shared_core_whiffs.py` (run by `shared_core_analyze.py`): every whiffed ground normal or throw, its recovery window (wiki startup + active, until the capture's committed frames end), the distance between the players, and whether the other player punished it. A chance needs a window of at least 15 frames (lights can't be whiff punished on reaction), the punisher free (walking, standing, crouching, dashing) and in reach of one of their ground normals; otherwise the reason is recorded (short window, edge of reach = a 0.3 step forward needed, out of reach, busy). Writes `whiffs.json` and a "Whiff punishes" section in report.md.
 - `shared_core_db.py`: new `whiff_windows` table; set_stats / game_stats `whiff_chances`, `whiff_punishes`, `whiffs`, `whiffs_punished`.
