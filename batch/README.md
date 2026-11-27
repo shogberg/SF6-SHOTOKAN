@@ -23,7 +23,7 @@ the results as `<ID>.mp4` + `<ID>.json` in your replays folder (`SHOTOKAN_REPLAY
        py batch_record.py --file ids.txt          (one ID per line, # comments allowed)
        py batch_record.py --no-obs ID1 ID2        (play and capture only, no video)
 
-Already-recorded IDs are skipped; a failed ID is retried once, then skipped. Progress is in `batch_record.log`.
+Already-recorded IDs are skipped; a failed ID is retried once, then skipped. Progress goes to the output and `batch_record.log`: `queue: N replays`, a `--- n/total: <ID>` line before each replay, and after each one a progress bar (`[####------] n/total (pct%) - ok, skipped, failed; elapsed, time left`), with time left estimated from recorded (not skipped) replays.
 Stop at any time with Ctrl+C, or the Stop button under "Batch replays" in the REFramework menu.
 
 ## How it moves through the menus

@@ -2,6 +2,11 @@
 
 Notable changes to the SHOTOKAN review tooling and skills, newest first. Every push adds its changes here.
 
+## 2026-11-27 (corner time, batch progress bar)
+- New `tools/corner_time.py`: seconds each player spends cornered per round (within 1.5 of the wall, opponent on the inner side, live play only), times cornered and the longest stretch. The analyzer writes `corner.json` and a `corner R…` line per round in report.md; ingest stores a `corner_time` table and `active_frames` / `cornered_frames` / `cornering_frames` / `cornered_entries` in `set_stats` and `game_stats`. `--backfill DB` fills sets already in the database (captures found through `paths.find_capture`; local captures without player names are matched by side).
+- `batch/batch_record.py`: a progress bar after each replay (done / total, ok / skipped / failed, elapsed and time left), the queue size at the start and a `--- n/total` line per replay.
+- README: corner time, the flags in use (`azfgc`, country codes), what `DRD_` and `HOLD` victim states mean. batch README: the progress output.
+
 ## 2026-11-26 (notable players, excluded sets)
 - `shared_core_db.py`:
     - New `player_flags` table and `flag` / `flags` commands, to mark notable / pro players (default flag `notable`).
