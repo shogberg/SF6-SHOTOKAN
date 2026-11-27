@@ -2,6 +2,12 @@
 
 Notable changes to the SHOTOKAN review tooling and skills, newest first. Every push adds its changes here.
 
+## 2026-11-27 (skills synced)
+- sf6-character-notes: A.K.I. has only light (52f) and OD (44f) fireballs, so light / heavy fireball rules don't apply; Sinister Slide follow-ups named (Venomous Fang = fireball skip, Heel Strike = kicks, Entrapment = command grab, stance cancel) and a rule to name the ending whenever a review suggests it.
+- sf6-fgc-glossary: Homura (Japanese players' name for Mai's SA1 flame stocks).
+- quick-review-report: corner time among the numbers to pull.
+- shared-core-review: several sets in one session get one manifest at a time; the number of games is a hint; predictions written after a result was seen are marked "(known: ...)".
+
 ## 2026-11-27 (corner time, batch progress bar)
 - New `tools/corner_time.py`: seconds each player spends cornered per round (within 1.5 of the wall, opponent on the inner side, live play only), times cornered and the longest stretch. The analyzer writes `corner.json` and a `corner R…` line per round in report.md; ingest stores a `corner_time` table and `active_frames` / `cornered_frames` / `cornering_frames` / `cornered_entries` in `set_stats` and `game_stats`. `--backfill DB` fills sets already in the database (captures found through `paths.find_capture`; local captures without player names are matched by side).
 - `batch/batch_record.py`: a progress bar after each replay (done / total, ok / skipped / failed, elapsed and time left), the queue size at the start and a `--- n/total` line per replay.
