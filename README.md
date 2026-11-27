@@ -28,6 +28,7 @@ Replay reviews for Street Fighter 6. Claude reads each game's REFramework captur
   - per-game stats and action timings;
   - every decision press (a new button, special, super or throw while the opponent isn't being hit or knocked down): its situation, the move, what the opponent was doing and the first outcome (landed, blocked, parried, whiffed, got hit);
   - corner time per round (`corner.json`, from `tools/corner_time.py`): seconds each player spent cornered, how many times they got cornered and the longest stretch. Cornered = within 1.5 of the wall (|posX| 7.65) with the opponent on the inner side, live play only (`fight_st` 4). A zoner who parks in the corner by choice counts too.
+  - whiff punishes (`whiffs.json`, from `tools/shared_core_whiffs.py`): every whiffed ground normal or throw, its recovery window (wiki startup + active, frame_data `frames`), the distance (posX, centre to centre; round start is 3.0 apart) and whether the other player punished it. A chance needs 15+ frames of recovery, the punisher free and in reach (frame_data `reach_vs_move`, measured with `tools/whiff_reach.py`).
 - **Victim states in hit rows:** `DRD_` (e.g. `5060_DRD_STD_L_START`) means the victim was already in hit reaction (a split combo or a reset), not in Drive Rush (`Drive Rush`) or blocking (`GRD_`). A `HOLD` state, sometimes only a number such as `_966`, is the being-grabbed animation: read the move just before it.
 - **Damage** is the permanent life a hit takes. When a hit lands while the victim has white (recoverable) health, the white health it cashes in counts too (e.g. after Arjun's blocked pressure or a Drive Reversal). Hit rows also record `recoverable` (white health the combo added) and `white_cashed`.
 - **Hit kinds**:
@@ -215,6 +216,7 @@ When a player has history in the database, the dashboard compares this set with 
 | `tools/spectra_backfill.py`, `rescore_damage.py`, `lethal_backfill.py`, `game_stats_backfill.py`, `relabel_moves.py`, `relabel_resolve.py` | Bring an existing database up to date after a rule change: spectra, damage (white health), lethal burnouts, per-game stats, move names. |
 | `tools/shared_core_blind_manifest.py` | Pre-set facts for a blind prediction (first game's header only). |
 | `tools/full_review_decision_presses.py` | Compare players' decision presses: per round by situation, outcome rates, top moves per situation. |
+| `tools/whiff_reach.py` | Measures each character's button reach from the captures (90th percentile contact distance) into `frame_data/`, for the whiff-punish step. |
 | `tools/archetype_calibrate.py` | Calibrates the generated archetype reads from the pool (without you) and rewrites every Quick set's read; `--dry` prints the split first. |
 | `tools/corner_time.py` | Corner time per round from a capture (also run by the analyzer); `--backfill` fills `corner_time` and the stats for sets already in the database. |
 | `tools/full_review_fireball_drive_rush.py` | Fireball Drive Rush value per character and player (damage both ways, Drive cost, mixup after a blocked button, round win rates). |

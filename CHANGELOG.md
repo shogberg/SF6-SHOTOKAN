@@ -2,6 +2,12 @@
 
 Notable changes to the SHOTOKAN review tooling and skills, newest first. Every push adds its changes here.
 
+## 2026-11-27 (whiff punishes)
+- New analyzer step `shared_core_whiffs.py` (run by `shared_core_analyze.py`): every whiffed ground normal or throw, its recovery window (wiki startup + active, until the capture's committed frames end), the distance between the players, and whether the other player punished it. A chance needs a window of at least 15 frames (lights can't be whiff punished on reaction), the punisher free (walking, standing, crouching, dashing) and in reach of one of their ground normals; otherwise the reason is recorded (short window, edge of reach = a 0.3 step forward needed, out of reach, busy). Writes `whiffs.json` and a "Whiff punishes" section in report.md.
+- `shared_core_db.py`: new `whiff_windows` table; set_stats / game_stats `whiff_chances`, `whiff_punishes`, `whiffs`, `whiffs_punished`.
+- `frame_data/<char>.json`: `frames` (wiki startup / active / recovery for ground normals and throws, all 32 characters) and `reach` / `reach_vs_move` (90th percentile contact distance per button, measured from the captures by the new `whiff_reach.py`; `reach_vs_move` counts only hits on an attacking opponent, as in a whiff punish).
+- quick-review-report and full-review-report: whiff punishes among the numbers to pull and the Full review checks. sf6-coach-shog: Structure note #2 rule 5, whiff punishes need a 15-frame window.
+
 ## 2026-11-27 (lean tags)
 - Generated reads' **lean** is up to two number-free tags for where the player stands out against the pool (top or bottom 20%): Drive Rush pressure / rarely Drive Rushes, presses on defense / holds block, jumps a lot for the character / stays grounded, counter-pokes and punishes, throw-heavy, anti-airs a lot, Drive Parry-heavy. It was mostly "no strong lean" or "presses early after blocking", with counts inside the text so the same style never matched. `archetype_calibrate.py` calibrates throws, anti-airs and Drive Parries per round for it.
 
