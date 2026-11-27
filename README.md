@@ -53,7 +53,7 @@ Replay reviews for Street Fighter 6. Claude reads each game's REFramework captur
   - make predictions before a set;
   - score player spectra against everyone reviewed so far.
 - **Blind predictions:** `tools/shared_core_blind_manifest.py` gives the pre-set facts without anything that leaks the result (round results, later games' MR, the number of games); `shared_core_db.py history` gathers history only from sets before the one predicted; `shared_core_db.py predict` stores the prediction before the analyzer runs, refuses once the set is ingested, and ingest links and grades it (`predictions` table).
-- `shared_core_db.py ingest` also computes the set's eight spectra and adds its replays to the behaviour cache first (`--no-spectra` skips it). `tools/spectra_backfill.py` fills sets that have none. Spectra are scored against everyone except you: `tools/spectra_calibrate.py DB` recalibrates the cut points from every other player (each weighted equally, less below 10 games) and re-scores all sets; `tools/player_baseline.py` (run by ingest) compares each of your sets with your own previous 7 days; `tools/character_baselines.py DB` prints the per-character baselines without you.
+- `shared_core_db.py ingest` also computes the set's nine spectra and adds its replays to the behaviour cache first (`--no-spectra` skips it). `tools/spectra_backfill.py` fills sets that have none. Spectra are scored against everyone except you: `tools/spectra_calibrate.py DB` recalibrates the cut points from every other player (each weighted equally, less below 10 games) and re-scores all sets; `tools/player_baseline.py` (run by ingest) compares each of your sets with your own previous 7 days; `tools/character_baselines.py DB` prints the per-character baselines without you.
 - **Review date, notable players, excluded sets** (2026-11-26):
   - `sets.reviewed_at` is when a set was first reviewed, kept on re-ingest; SHOTOKAN Web sorts its latest sets by it.
   - `shared_core_db.py flag DB NAME|CFN [FLAG] [--note ...] [--remove]` marks a notable / pro player (`player_flags`, default flag `notable`); `flags DB` lists them. Other flags in use: `azfgc` (a local group) and country codes `jp`, `kr`, `no`, `gb`, `us`, which the site shows as flag badges.
@@ -173,8 +173,8 @@ Replay reviews for Street Fighter 6. Claude reads each game's REFramework captur
   - **Medium**: mixed signs or only one game.
   - **Low**: a short or one-sided set.
 
-### The eight spectra
-Each player gets a 1-5 score on eight axes. 1 is the left end and 5 the right end, and neither end is "good" by itself. Scores are **percentile strata** against every player-set in the database: 1 = bottom 20%, 2 = 20-40%, 3 = 40-60% (middle), 4 = 60-80%, 5 = top 20%. In Full and Tournament reviews the reviewer can override a computed score; the card then says "Reviewer's call (computed X/5)".
+### The nine spectra
+Each player gets a 1-5 score on nine axes. 1 is the left end and 5 the right end, and neither end is "good" by itself. Scores are **percentile strata** against every player-set in the database: 1 = bottom 20%, 2 = 20-40%, 3 = 40-60% (middle), 4 = 60-80%, 5 = top 20%. In Full and Tournament reviews the reviewer can override a computed score; the card then says "Reviewer's call (computed X/5)".
 
 | Spectrum | 1 (left) ↔ 5 (right) | What's measured |
 |---|---|---|
@@ -186,6 +186,7 @@ Each player gets a 1-5 score on eight axes. 1 is the left end and 5 the right en
 | **Composure** | Steady ↔ Tilts | How much more they act after taking a 2,000+ combo or losing a round. |
 | **Variety** | Scripted ↔ Mixed | How spread out their after-block and wake-up choices are. Scripted players do the same thing every time. |
 | **Resource use** | Conservative ↔ Spendthrift | Drive, super and burnouts per round. |
+| **Space** | Gives ground ↔ Takes ground | Share of live time cornering the opponent minus share cornered (corner time). The set winner scores higher about 3 times in 4. |
 
 How to read a profile:
 - **Extremes (1 or 5) are exploitable habits.** For example:
@@ -213,6 +214,7 @@ When a player has history in the database, the dashboard compares this set with 
 | `tools/spectra_backfill.py`, `rescore_damage.py`, `lethal_backfill.py`, `game_stats_backfill.py`, `relabel_moves.py`, `relabel_resolve.py` | Bring an existing database up to date after a rule change: spectra, damage (white health), lethal burnouts, per-game stats, move names. |
 | `tools/shared_core_blind_manifest.py` | Pre-set facts for a blind prediction (first game's header only). |
 | `tools/full_review_decision_presses.py` | Compare players' decision presses: per round by situation, outcome rates, top moves per situation. |
+| `tools/archetype_calibrate.py` | Calibrates the generated archetype reads from the pool (without you) and rewrites every Quick set's read; `--dry` prints the split first. |
 | `tools/corner_time.py` | Corner time per round from a capture (also run by the analyzer); `--backfill` fills `corner_time` and the stats for sets already in the database. |
 | `tools/full_review_fireball_drive_rush.py` | Fireball Drive Rush value per character and player (damage both ways, Drive cost, mixup after a blocked button, round win rates). |
 | `tools/quick_review_reads.py`, `overview_from_db.py`, `profiles_from_db.py`, `sf6db_export.py`, `ranked_build.py` | Build dashboard datasets, overviews and player profiles from the database. The quick-dashboard they fed is retired ([archive](docs/archive/quick-dashboard.md)); `quick_review_reads.py --write-reads` is still run after a Quick review to write its reads and habits to the database. |

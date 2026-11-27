@@ -2,6 +2,12 @@
 
 Notable changes to the SHOTOKAN review tooling and skills, newest first. Every push adds its changes here.
 
+## 2026-11-27 (Space spectrum, archetype calibration)
+- `spectra.py`: ninth axis **Space** (Gives ground ↔ Takes ground): share of live time cornering the opponent minus share cornered, read from `corner_time` (needs at least a minute of live play). The set winner scores higher in about 3 of 4 sets. Own labels (Gives ground, Leans to giving ground, Even, Leans to taking ground, Takes ground).
+- `spectra_calibrate.py --axes space`: recalibrate only the named axes; the others keep their cut points.
+- New `archetype_calibrate.py`: the generated (Quick) archetype reads use pool-calibrated cut points instead of fixed per-set totals. Per round: pressing after blocking / on wake-up, Drive Rush pressure, forward jumps vs the character's pool average, counter hits + punish counters. Aggressive = aggression in the pool's top 30%, Fundamentalist = counter hits in the top 30% with aggression below the 60th percentile, Defensive = bottom 30%, Balanced = the rest. It stores `archetype_cuts` and rewrites every Quick set's read (Full reads are kept). On the author's data the pool now splits about evenly (was 56% Aggressive, 3% Fundamentalist).
+- shared-core-player-spectra reference and quick-review-report: the Space axis and the archetype rule.
+
 ## 2026-11-27 (jumping out of a throw)
 - sf6-coach-shog: jumping out of a throw is a read, never a reaction. A held wake-up jump always beats a meaty throw; when a throw loop rarely gets jumped, look at what the jump cost the defender, not at the throw's timing.
 
