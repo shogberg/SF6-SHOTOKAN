@@ -53,7 +53,7 @@ Replay reviews for Street Fighter 6. Claude reads each game's REFramework captur
   - make predictions before a set;
   - score player spectra against everyone reviewed so far.
 - **Blind predictions:** `tools/shared_core_blind_manifest.py` gives the pre-set facts without anything that leaks the result (round results, later games' MR, the number of games); `shared_core_db.py history` gathers history only from sets before the one predicted; `shared_core_db.py predict` stores the prediction before the analyzer runs, refuses once the set is ingested, and ingest links and grades it (`predictions` table).
-- `shared_core_db.py ingest` also computes the set's nine spectra and adds its replays to the behaviour cache first (`--no-spectra` skips it). `tools/spectra_backfill.py` fills sets that have none. Spectra are scored against everyone except you: `tools/spectra_calibrate.py DB` recalibrates the cut points from every other player (each weighted equally, less below 10 games) and re-scores all sets; `tools/player_baseline.py` (run by ingest) compares each of your sets with your own previous 7 days; `tools/character_baselines.py DB` prints the per-character baselines without you.
+- `shared_core_db.py ingest` also computes the set's ten spectra and adds its replays to the behaviour cache first (`--no-spectra` skips it). `tools/spectra_backfill.py` fills sets that have none. Spectra are scored against everyone except you: `tools/spectra_calibrate.py DB` recalibrates the cut points from every other player (each weighted equally, less below 10 games) and re-scores all sets; `tools/player_baseline.py` (run by ingest) compares each of your sets with your own previous 7 days; `tools/character_baselines.py DB` prints the per-character baselines without you.
 - **Review date, notable players, excluded sets** (2026-11-26):
   - `sets.reviewed_at` is when a set was first reviewed, kept on re-ingest; SHOTOKAN Web sorts its latest sets by it.
   - `shared_core_db.py flag DB NAME|CFN [FLAG] [--note ...] [--remove]` marks a notable / pro player (`player_flags`, default flag `notable`); `flags DB` lists them. Other flags in use: `azfgc` (a local group) and country codes `jp`, `kr`, `no`, `gb`, `us`, which the site shows as flag badges.
@@ -173,19 +173,20 @@ Replay reviews for Street Fighter 6. Claude reads each game's REFramework captur
   - **Medium**: mixed signs or only one game.
   - **Low**: a short or one-sided set.
 
-### The nine spectra
-Each player gets a 1-5 score on nine axes. 1 is the left end and 5 the right end, and neither end is "good" by itself. Scores are **percentile strata** against every player-set in the database: 1 = bottom 20%, 2 = 20-40%, 3 = 40-60% (middle), 4 = 60-80%, 5 = top 20%. In Full and Tournament reviews the reviewer can override a computed score; the card then says "Reviewer's call (computed X/5)".
+### The ten spectra
+Each player gets a 1-5 score on ten axes. 1 is the left end and 5 the right end, and neither end is "good" by itself. Scores are **percentile strata** against every player-set in the database: 1 = bottom 20%, 2 = 20-40%, 3 = 40-60% (middle), 4 = 60-80%, 5 = top 20%. In Full and Tournament reviews the reviewer can override a computed score; the card then says "Reviewer's call (computed X/5)".
 
 | Spectrum | 1 (left) ↔ 5 (right) | What's measured |
 |---|---|---|
 | **Temperament (defense)** | Impulsive ↔ Mindful | How often their first action after blocking or on wake-up is a button, special, jump or parry on reversal timing (0-2 frames). Impulsive players act at once; mindful players wait and block. |
 | **Temperament (offense)** | Impulsive ↔ Mindful | How often they press again within 3 frames of being free after their attack is blocked. |
-| **Adaptability** | Inelastic ↔ Elastic | Whether moves that got them counter-hit, punished or checked in earlier games (jabs aside) were used less later. Inelastic players keep doing it even when it hurts them; elastic players adjust. |
+| **Adaptability** | Inelastic ↔ Elastic | Whether the opponent's best weapon in the first half of the set (the move that did the most damage, 2,500+) still worked in the second half: damage per round after vs before. |
 | **Risk tolerance** | Low ↔ High | Wake-up reversals, Drive Impacts, Drive Reversals, raw Drive Rushes, supers and forward jumps per round. |
 | **Initiative** | Reactive ↔ Proactive | Forward movement in neutral, and how many neutral exchanges they start. |
 | **Composure** | Steady ↔ Tilts | How much more they act after taking a 2,000+ combo or losing a round. |
 | **Variety** | Scripted ↔ Mixed | How spread out their after-block and wake-up choices are. Scripted players do the same thing every time. |
 | **Resource use** | Conservative ↔ Spendthrift | Drive, super and burnouts per round. |
+| **Cash-in** | Speculative ↔ Cashes in | Share of the Drive and super spent that went into combos that landed. |
 | **Space** | Gives ground ↔ Takes ground | Share of live time cornering the opponent minus share cornered (corner time). The set winner scores higher about 3 times in 4. |
 
 How to read a profile:

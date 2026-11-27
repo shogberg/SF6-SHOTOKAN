@@ -2,6 +2,14 @@
 
 Notable changes to the SHOTOKAN review tooling and skills, newest first. Every push adds its changes here.
 
+## 2026-11-27 (Cash-in spectrum, Adaptability redefined)
+- `spectra.py`: **Adaptability** redefined: the move that did the most damage to the player in the first half of the set's rounds (2,500+), and its damage per round in the second half as a share of the first; lower is elastic. Winners now score more elastic than losers (53% higher, 29% lower); the old measure pointed the other way and sat at 3 in 38% of sets. Same internal key (`elasticity`), so overrides still apply.
+- New tenth spectrum **Cash-in** (Speculative ↔ Cashes in, key `cashin`): the share of Drive and super spent that went into combos that landed. The set winner scores higher in 68% of sets, lower in 17%.
+- Both axes calibrated with `spectra_calibrate.py DB --axes elasticity,cashin`.
+- `quick_review_reads.py`: generated counter-notes separate their points with semicolons.
+- README table and the spectra reference updated (ten spectra).
+- full-review-report: story polarity must be exactly `Worked well` or `To improve` (the site's Top highs / Top lows read those words).
+
 ## 2026-11-27 (Space spectrum, archetype calibration)
 - `spectra.py`: ninth axis **Space** (Gives ground ↔ Takes ground): share of live time cornering the opponent minus share cornered, read from `corner_time` (needs at least a minute of live play). The set winner scores higher in about 3 of 4 sets. Own labels (Gives ground, Leans to giving ground, Even, Leans to taking ground, Takes ground).
 - `spectra_calibrate.py --axes space`: recalibrate only the named axes; the others keep their cut points.
