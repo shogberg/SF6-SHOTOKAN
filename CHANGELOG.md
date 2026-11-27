@@ -2,6 +2,9 @@
 
 Notable changes to the SHOTOKAN review tooling and skills, newest first. Every push adds its changes here.
 
+## 2026-11-27 (lean tags)
+- Generated reads' **lean** is up to two number-free tags for where the player stands out against the pool (top or bottom 20%): Drive Rush pressure / rarely Drive Rushes, presses on defense / holds block, jumps a lot for the character / stays grounded, counter-pokes and punishes, throw-heavy, anti-airs a lot, Drive Parry-heavy. It was mostly "no strong lean" or "presses early after blocking", with counts inside the text so the same style never matched. `archetype_calibrate.py` calibrates throws, anti-airs and Drive Parries per round for it.
+
 ## 2026-11-27 (Cash-in spectrum, Adaptability redefined)
 - `spectra.py`: **Adaptability** redefined: the move that did the most damage to the player in the first half of the set's rounds (2,500+), and its damage per round in the second half as a share of the first; lower is elastic. Winners now score more elastic than losers (53% higher, 29% lower); the old measure pointed the other way and sat at 3 in 38% of sets. Same internal key (`elasticity`), so overrides still apply.
 - New tenth spectrum **Cash-in** (Speculative ↔ Cashes in, key `cashin`): the share of Drive and super spent that went into combos that landed. The set winner scores higher in 68% of sets, lower in 17%.
